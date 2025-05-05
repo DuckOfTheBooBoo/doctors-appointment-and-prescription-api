@@ -1,1 +1,1 @@
-# doctors-appointment-and-prescription-api
+# Doctor's Appointment and Prescription API
