@@ -1,5 +1,14 @@
 import express from "express";
-import type { Request, Response } from "express";
+import router from "./routes";
+import { validateEnv } from "./config/env.config";
+
+try {
+  validateEnv();
+} catch (err) {
+  const error = err as Error;
+  console.error("Environment validation failed:", error.message);
+  process.exit(1);
+}
 
 const app = express();
 
