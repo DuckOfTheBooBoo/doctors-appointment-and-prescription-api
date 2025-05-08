@@ -40,10 +40,8 @@ export async function createNewUser(req: Request, res: Response): Promise<void> 
         return;
     }
 
-    console.log("User data is valid:", result.data);
-
     try {
-        const newUser: User = await createUserService(req.body.first_name, req.body.last_name, req.body.date_of_birth, req.body.gender, req.body.phone, req.body.email, req.body.password, req.body.address);
+        const newUser: User = await createUserService(req.body);
         
         res.status(201).json({
             message: "Account creation successful",
