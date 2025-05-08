@@ -8,7 +8,7 @@ import { type PharmacistInput } from "@/types/common";
 import { format, type ResultSetHeader, type PoolConnection } from "mysql2/promise";
 
 export async function createPharmacistService(body: PharmacistInput): Promise<MedicalProfessional> {
-    const { prefix, suffix, first_name, last_name, date_of_birth, gender, phone, address } = body;
+    const { prefix, suffix, first_name, last_name, date_of_birth, gender, phone, email, address } = body;
     console.log(body)
     const newLicense = new License(body.license);
     const newPharmacist = new MedicalProfessional(
@@ -20,7 +20,7 @@ export async function createPharmacistService(body: PharmacistInput): Promise<Me
         date_of_birth,
         gender,
         phone,
-        null,
+        email,
         null,
         address,
         false,
@@ -36,7 +36,7 @@ export async function createPharmacistService(body: PharmacistInput): Promise<Me
 
             // Prepare the query and parameters
             const userQuery = userQueries.create;
-            const userParams = [newPharmacist.prefix, newPharmacist.suffix, newPharmacist.firstName, newPharmacist.lastName, newPharmacist.dateOfBirth, newPharmacist.gender, newPharmacist.phone, null, null, newPharmacist.address, false];
+            const userParams = [newPharmacist.prefix, newPharmacist.suffix, newPharmacist.firstName, newPharmacist.lastName, newPharmacist.dateOfBirth, newPharmacist.gender, newPharmacist.phone, newPharmacist.email, null, newPharmacist.address, false];
 
             // Log the final query
             console.log("Executing query:", format(userQuery, userParams));

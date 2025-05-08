@@ -9,7 +9,7 @@ import { format } from "mysql2";
 export async function createUserService(body: UserInput): Promise<User> {
     const { prefix, suffix, first_name, last_name, date_of_birth, gender, email, password, phone, address } = body;
     const hashedPassword = await hashPassword(password!);
-    const newUser = new User(null, prefix, suffix, first_name, last_name, date_of_birth, gender, phone, email, hashedPassword, address, true);
+    const newUser = new User(null, prefix, suffix, first_name, last_name, date_of_birth, gender, phone, email, hashedPassword, address, true, new Date(), new Date());
     
     try {
         console.log(format(userQueries.create, [newUser.prefix, newUser.suffix, newUser.firstName, newUser.lastName, newUser.dateOfBirth, gender, phone, email, hashedPassword, address, true]))

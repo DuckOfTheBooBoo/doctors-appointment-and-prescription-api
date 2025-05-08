@@ -14,7 +14,7 @@ export async function loginService(email: string, password: string): Promise<str
 
         const data = result[0];
         console.log(data);
-        const user = new User(data.id, data.prefix, data.suffix, data.first_name, data.last_name, data.date_of_birth, data.gender, data.phone, data.email, data.password, data.address, true);
+        const user = new User(data.id, data.prefix, data.suffix, data.first_name, data.last_name, data.date_of_birth, data.gender, data.phone, data.email, data.password, data.address, true, new Date(), new Date());
 
         const isValid = await checkPassword(password, user.password!);
         if (!isValid) {
