@@ -24,3 +24,16 @@ export interface DoctorInput extends UserInput {
     specialization: string;
     license: LicenseInput;
 }
+
+export interface PharmacistInput extends UserInput {
+    license: LicenseInput;
+}
+
+export interface MySQLError extends Error {
+    code: string;
+    errno: number;
+    fatal: boolean;
+    sql: string;
+    sqlState: string;
+    sqlMessage: string;
+}

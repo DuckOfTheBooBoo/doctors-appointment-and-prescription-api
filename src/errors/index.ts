@@ -18,10 +18,10 @@ export class InvalidCredentialsError extends Error {
     }
 }
 
-export class DuplicateEmailError extends Error {
+export class DuplicateError extends Error {
     constructor(message: string) {
         super(message);
-        this.name = "DuplicateEmailError";
+        this.name = "DuplicateError";
 
         Object.setPrototypeOf(this, new.target.prototype);
         Error.captureStackTrace(this);

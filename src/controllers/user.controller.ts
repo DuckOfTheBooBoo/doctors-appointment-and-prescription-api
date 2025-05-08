@@ -1,3 +1,4 @@
+import { DuplicateError } from '@/errors';
 import { User } from '@/models/user.model';
 import { createUserService } from '@/services/user.service';
 import type { Request, Response } from 'express';
@@ -40,6 +41,14 @@ export async function createNewUser(req: Request, res: Response): Promise<void> 
         return;
     }
 
+    if (!req.body.prefix) {
+        req.body.prefix = null;
+    }
+
+    if (!req.body.suffix) {
+        req.body.suffix = null;
+    }
+
     try {
         const newUser: User = await createUserService(req.body);
         
@@ -53,6 +62,13 @@ export async function createNewUser(req: Request, res: Response): Promise<void> 
         });
 
     } catch (error) {
+        if (error instanceof DuplicateError) {
+            res.status(409).json({
+                message: error.message
+            });    
+            return;
+        }
+
         console.error(error)
         res.status(500).json({
             message: "Something went wrong."

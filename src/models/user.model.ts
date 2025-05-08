@@ -1,14 +1,14 @@
 export class User {
-    public id: number | null;
-    public prefix: string | null;
-    public suffix: string | null;
+    public id: number | null = null;
+    public prefix: string | null = null;
+    public suffix: string | null = null;
     public firstName: string;
     public lastName: string | null;
     public dateOfBirth: Date;
     public gender: "M" | "F";
     public phone: string;
-    public email: string | null;
-    public password: string | null;
+    public email: string | null = null;
+    public password: string | null = null;
     public address: string;
     public isActive: boolean;
 
