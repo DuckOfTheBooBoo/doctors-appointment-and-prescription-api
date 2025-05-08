@@ -34,7 +34,7 @@ export async function createDoctorService(body: DoctorInput): Promise<Doctor> {
             newDoctor.license.id = licenseRes.insertId;
     
             // Create doctor's record
-            await connection.execute<ResultSetHeader>(doctorQueries.create, [newDoctor.id, newDoctor.specialization, newDoctor.license.id, 'inactive'])
+            await connection.execute<ResultSetHeader>(doctorQueries.create, [newDoctor.id, newDoctor.specialization, newDoctor.license.id, 'pending'])
             
             return true;
         });
