@@ -11,7 +11,25 @@ export async function createDoctorService(body: DoctorInput): Promise<MedicalPro
     const { prefix, suffix, first_name, last_name, date_of_birth, gender, phone, address } = body;
     console.log(body)
     const newLicense = new License(body.license);
-    const newDoctor = new MedicalProfessional(null, prefix, suffix, first_name, last_name, date_of_birth, gender, phone, null, null, address, false,"doctor", body.specialization, newLicense);
+    const newDoctor = new MedicalProfessional(
+        null,
+        prefix,
+        suffix,
+        first_name,
+        last_name,
+        date_of_birth,
+        gender,
+        phone,
+        null,
+        null,
+        address,
+        false,
+        new Date(),
+        new Date(),
+        "doctor",
+        body.specialization,
+        newLicense
+    );
 
     try {
         await db.transaction(async (connection: PoolConnection) => {

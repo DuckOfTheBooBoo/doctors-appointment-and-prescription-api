@@ -19,11 +19,13 @@ export class MedicalProfessional extends User {
         password: string | null,
         address: string,
         isActive: boolean = false,
+        createdAt: Date,
+        updatedAt: Date,
         role: "pharmacist" | "doctor",
         specialization: string | null,
         license: License
     ) {
-        super(id, prefix, suffix, firstName, lastName, dateOfBirth, gender, phone, email, password, address, isActive);
+        super(id, prefix, suffix, firstName, lastName, dateOfBirth, gender, phone, email, password, address, isActive, createdAt, updatedAt);
         this.role = role;
         this.specialization = specialization;
         this.license = license;

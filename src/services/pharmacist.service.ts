@@ -11,7 +11,25 @@ export async function createPharmacistService(body: PharmacistInput): Promise<Me
     const { prefix, suffix, first_name, last_name, date_of_birth, gender, phone, address } = body;
     console.log(body)
     const newLicense = new License(body.license);
-    const newPharmacist = new MedicalProfessional(null, prefix, suffix, first_name, last_name, date_of_birth, gender, phone, null, null, address, false, "pharmacist", null, newLicense);
+    const newPharmacist = new MedicalProfessional(
+        null,
+        prefix,
+        suffix,
+        first_name,
+        last_name,
+        date_of_birth,
+        gender,
+        phone,
+        null,
+        null,
+        address,
+        false,
+        new Date(),
+        new Date(),
+        "pharmacist",
+        null,
+        newLicense
+    );
 
     try {
         await db.transaction(async (connection: PoolConnection) => {

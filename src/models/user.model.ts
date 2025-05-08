@@ -11,6 +11,8 @@ export class User {
     public password: string | null = null;
     public address: string;
     public isActive: boolean;
+    public createdAt: Date;
+    public updatedAt: Date;
 
     constructor(
         id: number | null,
@@ -24,7 +26,9 @@ export class User {
         email: string | null,
         password: string | null,
         address: string,
-        isActive: boolean
+        isActive: boolean,
+        createdAt: Date,
+        updatedAt: Date
     ) {
         this.id = id;
         this.prefix = prefix;
@@ -38,5 +42,7 @@ export class User {
         this.password = password;
         this.address = address;
         this.isActive = isActive;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 }
