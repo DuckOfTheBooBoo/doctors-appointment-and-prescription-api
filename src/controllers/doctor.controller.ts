@@ -50,6 +50,7 @@ export async function createDoctor(req: Request, res: Response) {
                 { field: "specialization", error: "License's specialty and specialization didn't match" }
             ]
         })
+        return;
     }
 
     if (!req.body.prefix) {

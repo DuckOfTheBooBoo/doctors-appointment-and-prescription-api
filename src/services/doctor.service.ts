@@ -1,17 +1,17 @@
 import { db } from "@/db";
-import { doctorQueries } from "@/db/queries/doctor.queries";
 import { licenseQueries } from "@/db/queries/license.queries";
+import { medicalProfessionalsQueries } from "@/db/queries/medicalProfessionals.queries";
 import { userQueries } from "@/db/queries/user.queries";
-import { Doctor } from "@/models/doctor.model";
 import { License } from "@/models/license.model";
+import { MedicalProfessional } from "@/models/medicalProfessional.model";
 import { DoctorInput } from "@/types/common";
 import { format, ResultSetHeader, type PoolConnection } from "mysql2/promise";
 
-export async function createDoctorService(body: DoctorInput): Promise<Doctor> {
+export async function createDoctorService(body: DoctorInput): Promise<MedicalProfessional> {
     const { prefix, suffix, first_name, last_name, date_of_birth, gender, phone, address } = body;
     console.log(body)
     const newLicense = new License(body.license);
-    const newDoctor = new Doctor(null, prefix, suffix, first_name, last_name, date_of_birth, gender, phone, null, null, address, body.specialization, false, newLicense);
+    const newDoctor = new MedicalProfessional(null, prefix, suffix, first_name, last_name, date_of_birth, gender, phone, null, null, address, false,"doctor", body.specialization, newLicense);
 
     try {
         await db.transaction(async (connection: PoolConnection) => {
@@ -34,7 +34,7 @@ export async function createDoctorService(body: DoctorInput): Promise<Doctor> {
             newDoctor.license.id = licenseRes.insertId;
     
             // Create doctor's record
-            await connection.execute<ResultSetHeader>(doctorQueries.create, [newDoctor.id, newDoctor.specialization, newDoctor.license.id, 'pending'])
+            await connection.execute<ResultSetHeader>(medicalProfessionalsQueries.create, [newDoctor.id, newDoctor.role, newDoctor.specialization, newDoctor.license.id, 'pending'])
             
             return true;
         });

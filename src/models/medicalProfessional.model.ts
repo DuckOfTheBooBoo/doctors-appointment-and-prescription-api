@@ -1,8 +1,9 @@
 import { License } from "./license.model";
 import { User } from "./user.model";
 
-export class Doctor extends User {
-    public specialization: string;
+export class MedicalProfessional extends User {
+    public role: "pharmacist" | "doctor";
+    public specialization: string | null = null;
     public license: License;
 
     constructor(
@@ -17,11 +18,13 @@ export class Doctor extends User {
         email: string | null,
         password: string | null,
         address: string,
-        specialization: string,
-        isActive: boolean,
+        isActive: boolean = false,
+        role: "pharmacist" | "doctor",
+        specialization: string | null,
         license: License
     ) {
         super(id, prefix, suffix, firstName, lastName, dateOfBirth, gender, phone, email, password, address, isActive);
+        this.role = role;
         this.specialization = specialization;
         this.license = license;
     }
