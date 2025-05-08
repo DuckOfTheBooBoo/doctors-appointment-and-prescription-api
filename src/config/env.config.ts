@@ -12,7 +12,7 @@ interface Environment {
   DB_PASSWORD: string;
   DB_NAME: string;
   JWT_SECRET?: string;
-  JWT_EXPIRES_IN?: string;
+  JWT_EXPIRES_IN?: number; // seconds
   ADMIN_KEY: string;
   SALT_ROUNDS: number;
 }
@@ -26,7 +26,7 @@ export const env: Environment = {
   DB_PASSWORD: process.env.DB_PASSWORD || 'password',
   DB_NAME: process.env.DB_NAME || 'my_database',
   JWT_SECRET: process.env.JWT_SECRET,
-  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '1d',
+  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN ? parseInt(process.env.JWT_EXPIRES_IN) : 3600,
   ADMIN_KEY: process.env.ADMIN_KEY || 'admin_key',
   SALT_ROUNDS: process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS) : 10
 };
