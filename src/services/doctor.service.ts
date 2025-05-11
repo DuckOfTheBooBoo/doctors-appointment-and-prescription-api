@@ -1,16 +1,27 @@
+// Mengimpor koneksi database
 import { db } from "@/db";
+// Mengimpor query license
 import { licenseQueries } from "@/db/queries/license.queries";
+// Mengimpor query medical professionals
 import { medicalProfessionalsQueries } from "@/db/queries/medicalProfessionals.queries";
+// Mengimpor query user
 import { userQueries } from "@/db/queries/user.queries";
+// Mengimpor model License
 import { License } from "@/models/license.model";
+// Mengimpor model MedicalProfessional
 import { MedicalProfessional } from "@/models/medicalProfessional.model";
+// Mengimpor tipe input DoctorInput dari "@/types/common"
 import { DoctorInput } from "@/types/common";
-import { format, ResultSetHeader, type PoolConnection } from "mysql2/promise";
+// Mengimpor tipe ResultSetHeader dan PoolConnection
+import { type ResultSetHeader, type PoolConnection } from "mysql2/promise";
 
+// Fungsi untuk membuat doctor baru
 export async function createDoctorService(body: DoctorInput): Promise<MedicalProfessional> {
+    // Destruktur properti yang diperlukan dari body
     const { prefix, suffix, first_name, last_name, date_of_birth, gender, phone, email, address } = body;
-    console.log(body)
+    // Membuat instance License baru untuk doctor
     const newLicense = new License(body.license);
+    // Membuat instance MedicalProfessional baru dengan role "doctor" dan spesialisasi
     const newDoctor = new MedicalProfessional(
         null,
         prefix,
@@ -32,33 +43,52 @@ export async function createDoctorService(body: DoctorInput): Promise<MedicalPro
     );
 
     try {
+        // Memulai transaksi database
         await db.transaction(async (connection: PoolConnection) => {
 
-            // Prepare the query and parameters
-            const userQuery = userQueries.create;
-            const userParams = [newDoctor.prefix, newDoctor.suffix, newDoctor.firstName, newDoctor.lastName, newDoctor.dateOfBirth, newDoctor.gender, newDoctor.phone, newDoctor.email, null, newDoctor.address, false];
-
-            // Log the final query
-            console.log("Executing query:", format(userQuery, userParams));
-            
-            // Create doctor's user record
-            const [userRes] = await connection.execute<ResultSetHeader>(userQueries.create, [newDoctor.prefix, newDoctor.suffix, newDoctor.firstName, newDoctor.lastName, newDoctor.dateOfBirth, newDoctor.gender, newDoctor.phone, null, null, newDoctor.address, false]);
+            // Membuat record user untuk doctor
+            const [userRes] = await connection.execute<ResultSetHeader>(userQueries.create, [
+                newDoctor.prefix,
+                newDoctor.suffix,
+                newDoctor.firstName,
+                newDoctor.lastName,
+                newDoctor.dateOfBirth,
+                newDoctor.gender,
+                newDoctor.phone,
+                null,
+                null,
+                newDoctor.address,
+                false
+            ]);
+            // Update id doctor dari hasil insert ke table user
             newDoctor.id = userRes.insertId;
     
-            console.log(format(licenseQueries.create, [newLicense.number, newLicense.issuingAuthority, newLicense.issueDate, newLicense.expiryDate, newLicense.specialty]))
-
-            // Create doctor's license
-            const [licenseRes] = await connection.execute<ResultSetHeader>(licenseQueries.create, [newLicense.number, newLicense.issuingAuthority, newLicense.issueDate, newLicense.expiryDate, newLicense.specialty])
+            // Membuat record license untuk doctor
+            const [licenseRes] = await connection.execute<ResultSetHeader>(licenseQueries.create, [
+                newLicense.number,
+                newLicense.issuingAuthority,
+                newLicense.issueDate,
+                newLicense.expiryDate,
+                newLicense.specialty
+            ]);
+            // Update id license pada objek doctor
             newDoctor.license.id = licenseRes.insertId;
     
-            // Create doctor's record
-            await connection.execute<ResultSetHeader>(medicalProfessionalsQueries.create, [newDoctor.id, newDoctor.role, newDoctor.specialization, newDoctor.license.id, 'pending'])
+            // Membuat record medical professional untuk doctor
+            await connection.execute<ResultSetHeader>(medicalProfessionalsQueries.create, [
+                newDoctor.id,
+                newDoctor.role,
+                newDoctor.specialization,
+                newDoctor.license.id,
+                'pending'
+            ]);
             
             return true;
         });
-
+        // Mengembalikan objek doctor yang baru dibuat
         return newDoctor;
     } catch (error) {
+        // Melempar ulang error jika terjadi kesalahan
         throw error;
     }
 }

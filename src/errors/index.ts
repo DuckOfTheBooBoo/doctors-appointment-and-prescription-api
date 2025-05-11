@@ -1,3 +1,4 @@
+// Mendefinisikan error khusus untuk token JWT yang tidak valid
 export class JWTInvalidError extends Error {
     constructor(message: string) {
         super(message);
@@ -8,6 +9,7 @@ export class JWTInvalidError extends Error {
     }
 }
 
+// Mendefinisikan error untuk kredensial yang tidak valid saat login
 export class InvalidCredentialsError extends Error {
     constructor(message: string) {
         super(message);
@@ -18,6 +20,7 @@ export class InvalidCredentialsError extends Error {
     }
 }
 
+// Mendefinisikan error khusus untuk data duplikat (misal: duplicate key)
 export class DuplicateError extends Error {
     constructor(message: string) {
         super(message);
@@ -28,6 +31,7 @@ export class DuplicateError extends Error {
     }
 }
 
+// Mendefinisikan error untuk data yang tidak ditemukan
 export class NotFoundError extends Error {
     constructor(message: string) {
         super(message);

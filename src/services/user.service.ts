@@ -1,18 +1,27 @@
+// Mengimpor koneksi database dari module "@/db"
 import { db } from "@/db";
+// Mengimpor query yang digunakan untuk operasi user dari "@/db/queries/user.queries"
 import { userQueries } from "@/db/queries/user.queries";
+// Mengimpor error khusus DuplicateError dari module "@/errors"
 import { DuplicateError } from "@/errors";
+// Mengimpor model User dari "@/models/user.model"
 import { User } from "@/models/user.model";
+// Mengimpor tipe MySQLError dan UserInput dari "@/types/common"
 import { MySQLError, UserInput } from "@/types/common";
+// Mengimpor fungsi hashPassword dari "@/utils/bcrypt"
 import { hashPassword } from "@/utils/bcrypt";
-import { format } from "mysql2";
 
+// Membuat fungsi service untuk membuat user baru
 export async function createUserService(body: UserInput): Promise<User> {
+    // Mendestruktur body untuk properti yang diperlukan
     const { prefix, suffix, first_name, last_name, date_of_birth, gender, email, password, phone, address } = body;
+    // Mengenkripsi password menggunakan fungsi hashPassword
     const hashedPassword = await hashPassword(password!);
+    // Membuat instance baru dari class User
     const newUser = new User(null, prefix, suffix, first_name, last_name, date_of_birth, gender, phone, email, hashedPassword, address, true, new Date(), new Date());
     
     try {
-        console.log(format(userQueries.create, [newUser.prefix, newUser.suffix, newUser.firstName, newUser.lastName, newUser.dateOfBirth, gender, phone, email, hashedPassword, address, true]))
+        // Mengeksekusi query untuk membuat user baru ke database
         const result = await db.execute(
             userQueries.create,
             [
@@ -29,14 +38,18 @@ export async function createUserService(body: UserInput): Promise<User> {
                 newUser.isActive,
             ]
         );
+        // Mengupdate properti id dengan insertId dari database
         newUser.id = result.insertId;
+        // Mengembalikan objek user baru
         return newUser;
     } catch (error) {
+        // Menangani error dan casting ke tipe MySQLError
         const err = error as MySQLError;
+        // Jika error merupakan duplicate key error (errno 1062), lempar DuplicateError
         if (err.errno && err.errno === 1062) {
             throw new DuplicateError(err.sqlMessage);
         }
-        
+        // Mencetak error dan melempar ulang error tersebut
         console.error("Error while creating user:", error);
         throw error;
     }

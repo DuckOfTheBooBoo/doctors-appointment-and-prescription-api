@@ -1,11 +1,16 @@
+// Mengimpor error DuplicateError dari "@/errors"
 import { DuplicateError } from '@/errors';
+// Mengimpor model User dari "@/models/user.model"
 import { User } from '@/models/user.model';
+// Mengimpor fungsi service untuk membuat user baru
 import { createUserService } from '@/services/user.service';
+// Mengimpor tipe Request dan Response dari express
 import type { Request, Response } from 'express';
+// Mengimpor modul zod untuk validasi
 import { z } from 'zod';
 
 export async function createNewUser(req: Request, res: Response): Promise<void> {
-    // Non-nullable fields check
+    // Mendefinisikan schema validasi untuk field-field wajib
     const validationSchema = z.object({
         first_name: z.string().min(1, "Please provide first name."),
         date_of_birth: z.string()
@@ -26,9 +31,11 @@ export async function createNewUser(req: Request, res: Response): Promise<void> 
         address: z.string().min(1, "Please provide address.")
     });
 
+    // Mem-validasi request body dengan schema di atas
     const result = validationSchema.safeParse(req.body);
 
     if (!result.success) {
+        // Jika validasi gagal, mapping error dan mengirim response 400
         const errors = result.error.errors.map(error => ({
             field: error.path[0],
             error: error.message
@@ -41,17 +48,19 @@ export async function createNewUser(req: Request, res: Response): Promise<void> 
         return;
     }
 
+    // Jika prefix/suffix tidak diberikan, set menjadi null
     if (!req.body.prefix) {
         req.body.prefix = null;
     }
-
     if (!req.body.suffix) {
         req.body.suffix = null;
     }
 
     try {
+        // Memanggil service untuk membuat user baru
         const newUser: User = await createUserService(req.body);
         
+        // Mengirim response sukses dengan status 201
         res.status(201).json({
             message: "Account creation successful",
             data: newUser,
@@ -62,13 +71,14 @@ export async function createNewUser(req: Request, res: Response): Promise<void> 
         });
 
     } catch (error) {
+        // Jika terjadi DuplicateError, kirim response 409
         if (error instanceof DuplicateError) {
             res.status(409).json({
                 message: error.message
             });    
             return;
         }
-
+        // Mencetak error dan mengirim response 500
         console.error(error)
         res.status(500).json({
             message: "Something went wrong."

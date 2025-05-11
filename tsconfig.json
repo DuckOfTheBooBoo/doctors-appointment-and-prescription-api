@@ -1,32 +1,34 @@
 {
+  // Opsi compiler TypeScript
   "compilerOptions": {
-    "target": "es2016",
-    "module": "commonjs",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true,
-    "sourceMap": true,
-    "declaration": true,
-    "removeComments": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "baseUrl": "./src",
-    "paths": {
-      "@/*": ["./*"]
+    "target": "es2016", // Target ECMAScript adalah ES2016
+    "module": "commonjs", // Menggunakan sistem modul CommonJS
+    "esModuleInterop": true, // Mengaktifkan interoperabilitas ES module
+    "forceConsistentCasingInFileNames": true, // Memaksa konsistensi penamaan file
+    "strict": true, // Mengaktifkan mode strict
+    "skipLibCheck": true, // Mengabaikan pengecekan tipe pada file library
+    "resolveJsonModule": true, // Mengizinkan impor file JSON
+    "sourceMap": true, // Menghasilkan source map untuk debugging
+    "declaration": true, // Menghasilkan file deklarasi (.d.ts)
+    "removeComments": true, // Menghapus komentar dari output
+    "noImplicitAny": true, // Tidak mengizinkan tipe any secara implisit
+    "strictNullChecks": true, // Mengaktifkan pengecekan null secara ketat
+    "strictFunctionTypes": true, // Memeriksa tipe fungsi secara ketat
+    "strictBindCallApply": true, // Memeriksa bind, call, dan apply secara ketat
+    "strictPropertyInitialization": true, // Memastikan properti kelas diinisialisasi
+    "noImplicitThis": true, // Menghindari penggunaan this implisit
+    "alwaysStrict": true, // Selalu menjalankan dalam mode strict
+    "noUnusedLocals": true, // Memeriksa variabel lokal yang tidak terpakai
+    "noUnusedParameters": true, // Memeriksa parameter fungsi yang tidak terpakai
+    "noImplicitReturns": true, // Memastikan semua cabang return memiliki nilai
+    "noFallthroughCasesInSwitch": true, // Mencegah jatuhnya eksekusi antar-case di switch
+    "baseUrl": "./src", // Direktori dasar untuk pencarian modul
+    "paths": { 
+      "@/*": ["./*"] // Alias untuk impor dengan prefix "@/"
     }
   },
+  // Konfigurasi untuk ts-node
   "ts-node": {
-        "require": ["tsconfig-paths/register"]
+        "require": ["tsconfig-paths/register"] // Meregistrasikan tsconfig-paths agar alias dapat dikenali
     }
 }

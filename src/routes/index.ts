@@ -1,14 +1,22 @@
+// Mengimpor Router dari express
 import { Router } from "express";
+// Mengimpor router user dari file user.routes
 import userRoutes from "./user.routes";
+// Mengimpor router auth dari file auth.routes
 import authRoutes from "./auth.routes";
+// Mengimpor router doctor dari file doctor.routes
 import doctorRoutes from "./doctor.routes";
+// Mengimpor router pharmacist dari file pharmacist.routes
 import pharmacistRoutes from "./pharmacist.routes";
+// Mengimpor router admin dari file admin.routes
+import adminRoutes from "./admin.routes";
 
-const router = Router();
+const router = Router(); // Membuat instance router utama
 
-router.use("/users", userRoutes);
-router.use("/auth", authRoutes);
-router.use("/doctors", doctorRoutes);
-router.use("/pharmacists", pharmacistRoutes);
+router.use("/users", userRoutes); // Menggunakan route untuk user dengan prefix "/users"
+router.use("/auth", authRoutes); // Menggunakan route untuk auth dengan prefix "/auth"
+router.use("/doctors", doctorRoutes); // Menggunakan route untuk doctor dengan prefix "/doctors"
+router.use("/pharmacists", pharmacistRoutes); // Menggunakan route untuk pharmacist dengan prefix "/pharmacists"
+router.use("/admin", adminRoutes); // Menggunakan route untuk admin dengan prefix "/admin"
 
-export default router;
+export default router; // Mengekspor router utama

@@ -1,9 +1,14 @@
+// Mengimpor fungsi service untuk membuat doctor
 import { createDoctorService } from "@/services/doctor.service";
+// Mengimpor tipe DoctorInput
 import { DoctorInput } from "@/types/common";
+// Mengimpor tipe Request dan Response dari express
 import type { Request, Response } from "express";
+// Mengimpor modul zod untuk validasi
 import { z } from "zod";
 
 export async function createDoctor(req: Request, res: Response) {
+    // Mendefinisikan schema validasi untuk data license doctor
     const licenseSchema = z.object({
         number: z.string().min(1, "Please provide license's number"),
         issuing_authority: z.string().min(1, "Please provide license issuing authority"),
@@ -12,6 +17,7 @@ export async function createDoctor(req: Request, res: Response) {
         specialty: z.string().min(1, "Please provide specialty")
     });
     
+    // Mendefinisikan schema validasi untuk doctor
     const validationSchema = z.object({
         first_name: z.string().min(1, "Please provide first name."),
         date_of_birth: z.string()
@@ -23,14 +29,17 @@ export async function createDoctor(req: Request, res: Response) {
         phone: z.string()
             .min(1, "Please provide phone number.")
             .regex(/^\+?[1-9]\d{1,14}$/, "Phone number format is invalid"),
+        email: z.string().min(1, "Please provide email.").email('Invalid email format'),
         address: z.string().min(1, "Please provide address."),
         specialization: z.string().min(1, "Please provide specialization"),
         license: licenseSchema
     });
 
+    // Validasi request body
     const result = validationSchema.safeParse(req.body);
 
     if (!result.success) {
+        // Mapping error validasi dan mengirim response 400
         const errors = result.error.errors.map(error => ({
             field: error.path[0],
             error: error.message
@@ -43,6 +52,7 @@ export async function createDoctor(req: Request, res: Response) {
         return;
     }
 
+    // Jika specialty license dan specialization tidak cocok, kirim error
     if (req.body.license.specialty !== req.body.specialization) {
         res.status(400).json({
             message: "Validation failed",
@@ -53,21 +63,24 @@ export async function createDoctor(req: Request, res: Response) {
         return;
     }
 
+    // Set prefix/suffix ke null bila tidak diberikan
     if (!req.body.prefix) {
         req.body.prefix = null;
     }
-
     if (!req.body.suffix) {
         req.body.suffix = null;
     }
 
     try {
+        // Memanggil service untuk membuat doctor baru
         await createDoctorService(req.body as DoctorInput);
+        // Mengirim response 201 bahwa account telah dibuat dan menunggu persetujuan admin
         res.status(201).json({
             message: "Account creation successful. Please wait for admin approval to proceed.",
         });
 
     } catch (error) {
+        // Mencetak error dan mengirim response 500 jika terjadi kesalahan
         console.error(error)
         res.status(500).json({
             message: "Something went wrong."

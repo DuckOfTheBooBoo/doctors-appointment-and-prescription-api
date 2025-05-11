@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Load environment variables from .env file
+// Memuat environment variables dari file .env yang berada di dua level di atas direktori ini
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+// Mendefinisikan interface Environment untuk tipe environment variables
 interface Environment {
   PORT: number;
   DB_HOST: string;
@@ -12,12 +13,12 @@ interface Environment {
   DB_PASSWORD: string;
   DB_NAME: string;
   JWT_SECRET?: string;
-  JWT_EXPIRES_IN?: number; // seconds
+  JWT_EXPIRES_IN?: number; // lama waktu kadaluarsa JWT (detik)
   ADMIN_KEY: string;
   SALT_ROUNDS: number;
 }
 
-// Set default values for environment variables
+// Membuat objek env dengan nilai default bila tidak didefinisikan
 export const env: Environment = {
   PORT: Number(process.env.PORT) || 3000,
   DB_HOST: process.env.DB_HOST || 'localhost',
@@ -31,16 +32,19 @@ export const env: Environment = {
   SALT_ROUNDS: process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS) : 10
 };
 
-// Validate required environment variables
+// Fungsi untuk memvalidasi environment variables yang wajib ada
 export const validateEnv = (): void => {
+  // Daftar variabel yang diperlukan
   const requiredEnvVars: Array<keyof Environment> = [
     'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME', 'ADMIN_KEY', 'JWT_SECRET'
   ];
   
+  // Memeriksa variabel yang tidak didefinisikan
   const missingEnvVars = requiredEnvVars.filter(
     (envVar) => !process.env[envVar]
   );
   
+  // Jika ada variabel yang hilang, lempar error
   if (missingEnvVars.length > 0) {
     throw new Error(`Missing required environment variables: ${missingEnvVars.join(', ')}`);
   }
