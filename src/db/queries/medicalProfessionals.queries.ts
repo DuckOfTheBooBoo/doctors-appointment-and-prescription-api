@@ -4,5 +4,13 @@ export const medicalProfessionalsQueries = {
     // Query untuk mengambil medical professional berdasarkan id
     getById: `SELECT * FROM medical_professionals WHERE id = ?`,
     // Query untuk membuat record medical professional baru
-    create: `INSERT INTO medical_professionals (id, role, specialization, license_id, status) VALUES (?,?,?,?,?);`
+    create: `INSERT INTO medical_professionals (id, role, specialization, license_id, status) VALUES (?,?,?,?,?);`,
+    // Query untuk mengambil doctors dengan pagination
+    getDoctors: `
+        SELECT u.id, prefix, suffix, first_name, last_name, specialization 
+        FROM medical_professionals 
+        JOIN users u ON medical_professionals.id = u.id 
+        WHERE role = 'doctor' AND AND specialization = COALESCE(?, specialization); 
+        LIMIT ? OFFSET ?;
+    `
 }

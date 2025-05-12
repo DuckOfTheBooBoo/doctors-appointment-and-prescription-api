@@ -1,5 +1,5 @@
 // Mengimpor fungsi service untuk membuat doctor
-import { createDoctorService } from "@/services/doctor.service";
+import { createDoctorService, getDoctorsService } from "@/services/doctor.service";
 // Mengimpor tipe DoctorInput
 import { DoctorInput } from "@/types/common";
 // Mengimpor tipe Request dan Response dari express
@@ -88,4 +88,22 @@ export async function createDoctor(req: Request, res: Response) {
         return;
     }
     return;
+}
+
+export async function getDoctors(req: Request, res: Response) {
+    const { page = 1, limit = 10, specialization } = req.query;
+
+    try {
+        const doctors = await getDoctorsService(Number(page), Number(limit), specialization ? specialization as string : null);
+        res.status(200).json(doctors);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Something went wrong."
+        });
+    }
+}
+
+export async function getAllDoctors(_: Request, res: Response) {
+    res.status(200).json({});
 }

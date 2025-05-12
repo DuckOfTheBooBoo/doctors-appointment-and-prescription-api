@@ -13,7 +13,7 @@ import { MedicalProfessional } from "@/models/medicalProfessional.model";
 // Mengimpor tipe input DoctorInput dari "@/types/common"
 import { DoctorInput } from "@/types/common";
 // Mengimpor tipe ResultSetHeader dan PoolConnection
-import { type ResultSetHeader, type PoolConnection } from "mysql2/promise";
+import { type ResultSetHeader, type PoolConnection, RowDataPacket } from "mysql2/promise";
 
 // Fungsi untuk membuat doctor baru
 export async function createDoctorService(body: DoctorInput): Promise<MedicalProfessional> {
@@ -89,6 +89,27 @@ export async function createDoctorService(body: DoctorInput): Promise<MedicalPro
         return newDoctor;
     } catch (error) {
         // Melempar ulang error jika terjadi kesalahan
+        throw error;
+    }
+}
+
+interface DoctorsQuery extends RowDataPacket {
+    id: number;
+    prefix: string | null;
+    suffix: string | null;
+    first_name: string;
+    last_name: string | null;
+    specialization: string;
+}
+
+// Fungsi untuk mendapatkan daftar doctors dengan pagination
+export async function getDoctorsService(page: number, limit: number, specialty: string | null = null) {
+    const offset = (page - 1) * limit;
+
+    try {
+        const rows = await db.query<DoctorsQuery[]>(medicalProfessionalsQueries.getDoctors, [specialty, limit, offset]);
+        return rows;
+    } catch (error) {
         throw error;
     }
 }
