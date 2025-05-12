@@ -4,12 +4,14 @@ import { db } from "@/db";
 import { licenseQueries } from "@/db/queries/license.queries";
 // Mengimpor query medical professionals
 import { medicalProfessionalsQueries } from "@/db/queries/medicalProfessionals.queries";
+import { scheduleQueries } from "@/db/queries/schedule.queries";
 // Mengimpor query user
 import { userQueries } from "@/db/queries/user.queries";
 // Mengimpor model License
 import { License } from "@/models/license.model";
 // Mengimpor model MedicalProfessional
 import { MedicalProfessional } from "@/models/medicalProfessional.model";
+import { Schedule } from "@/models/schedule.model";
 // Mengimpor tipe input DoctorInput dari "@/types/common"
 import { DoctorInput } from "@/types/common";
 // Mengimpor tipe ResultSetHeader dan PoolConnection
@@ -109,6 +111,19 @@ export async function getDoctorsService(page: number, limit: number, specialty: 
     try {
         const rows = await db.query<DoctorsQuery[]>(medicalProfessionalsQueries.getDoctors, [specialty, limit, offset]);
         return rows;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export async function addDoctorScheduleService(doctorId: number, body: { date: string; start_hour: number; end_hour: number }): Promise<Schedule> {
+    const { date, start_hour, end_hour } = body;
+
+    try {
+        const result = await db.execute(scheduleQueries.create, [doctorId, date, start_hour, end_hour]);
+        const scheduleId = result.insertId;
+
+        return new Schedule(scheduleId, doctorId, new Date(date), start_hour, end_hour);
     } catch (error) {
         throw error;
     }

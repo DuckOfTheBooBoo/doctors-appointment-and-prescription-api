@@ -25,10 +25,11 @@
     "baseUrl": "./src", // Direktori dasar untuk pencarian modul
     "paths": { 
       "@/*": ["./*"] // Alias untuk impor dengan prefix "@/"
-    }
+    },
+    "typeRoots": ["./src/types", "./node_modules/@types"]
   },
   // Konfigurasi untuk ts-node
   "ts-node": {
         "require": ["tsconfig-paths/register"] // Meregistrasikan tsconfig-paths agar alias dapat dikenali
-    }
+    },
 }
