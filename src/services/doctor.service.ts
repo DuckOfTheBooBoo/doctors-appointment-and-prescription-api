@@ -16,6 +16,7 @@ import { Schedule } from "@/models/schedule.model";
 import { DoctorInput } from "@/types/common";
 // Mengimpor tipe ResultSetHeader dan PoolConnection
 import { type ResultSetHeader, type PoolConnection, RowDataPacket } from "mysql2/promise";
+import { NotFoundError } from "@/errors";
 
 // Fungsi untuk membuat doctor baru
 export async function createDoctorService(body: DoctorInput): Promise<MedicalProfessional> {
@@ -127,4 +128,49 @@ export async function addDoctorScheduleService(doctorId: number, body: { date: s
     } catch (error) {
         throw error;
     }
+}
+
+interface DoctorInfoRow extends RowDataPacket {
+    id: number;
+    prefix: string | null;
+    first_name: string;
+    last_name: string | null;
+    suffix: string | null;
+    email: string;
+    specialization: string;
+}
+
+interface ScheduleRow extends RowDataPacket {
+    id: number;
+    doctor_id: number;
+    date: Date;
+    start_hour: number;
+    end_hour: number;
+}
+
+export async function getDoctorDetailsService(doctorId: number, startDate?: string, endDate?: string) {
+    // Default dates to today if not provided in YYYY-MM-DD format
+    const today = new Date();
+    const defaultDate = today.toISOString().substring(0, 10);
+    const start = startDate || defaultDate;
+    const end = endDate || defaultDate;
+
+    // Use the query from medicalProfessionalsQueries
+    const doctorRows = await db.query<DoctorInfoRow[]>(medicalProfessionalsQueries.getDoctorDetails, [doctorId]);
+    if (doctorRows.length === 0) {
+        throw new NotFoundError("Doctor not found");
+    }
+
+    const doctor = doctorRows[0];
+    const fullName = `${doctor.prefix ? doctor.prefix + " " : ""}${doctor.first_name}${doctor.last_name ? " " + doctor.last_name : ""}${doctor.suffix ? " " + doctor.suffix : ""}`.trim();
+
+    const scheduleRows = await db.query<ScheduleRow[]>(scheduleQueries.getByDateRange, [doctorId, start, end]);
+
+    return {
+        id: doctor.id,
+        full_name: fullName,
+        email: doctor.email,
+        specialization: doctor.specialization,
+        schedules: scheduleRows
+    };
 }

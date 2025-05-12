@@ -1,5 +1,6 @@
 // Mengimpor fungsi service untuk membuat doctor
-import { addDoctorScheduleService, createDoctorService, getDoctorsService } from "@/services/doctor.service";
+import { NotFoundError } from "@/errors";
+import { addDoctorScheduleService, createDoctorService, getDoctorDetailsService, getDoctorsService } from "@/services/doctor.service";
 // Mengimpor tipe DoctorInput
 import { DoctorInput } from "@/types/common";
 // Mengimpor tipe Request dan Response dari express
@@ -185,6 +186,42 @@ export async function addSchedule(req: Request, res: Response): Promise<void> {
             data: schedule
         });
     } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Something went wrong."
+        });
+    }
+}
+
+export async function getDoctorDetails(req: Request, res: Response) {
+    const { doctor_id } = req.params;
+    const doctorId = parseInt(doctor_id, 10);
+    if (isNaN(doctorId)) {
+        res.status(400).json({
+            message: "Validation failed",
+            errors: [
+                { field: "doctor_id", message: "doctor_id should be a number" } 
+            ]
+        });
+        return;
+    }
+    // Optional query parameters for date range in YYYY-MM-DD format
+    const { start_date, end_date } = req.query;
+    try {
+        const details = await getDoctorDetailsService(doctorId, start_date as string | undefined, end_date as string | undefined);
+        res.status(200).json({
+            message: null,
+            data: details
+        });
+    } catch (error) {
+
+        if (error instanceof NotFoundError) {
+            res.status(404).json({
+                message: "Doctor not found"
+            });
+            return;
+        }
+
         console.error(error);
         res.status(500).json({
             message: "Something went wrong."

@@ -10,6 +10,10 @@ export const medicalProfessionalsQueries = {
         FROM medical_professionals 
         JOIN users u ON medical_professionals.id = u.id 
         WHERE role = 'doctor' AND specialization = COALESCE(?, specialization)
-        LIMIT ? OFFSET ?;
-    `
-}
+        LIMIT ? OFFSET ?;`,
+    // New key: get doctor details using users and medical_professionals tables
+    getDoctorDetails: `SELECT u.id, u.prefix, u.first_name, u.last_name, u.suffix, u.email, mp.specialization 
+        FROM users u 
+        JOIN medical_professionals mp ON u.id = mp.id 
+        WHERE u.id = ? AND mp.role = 'doctor'`,
+};
