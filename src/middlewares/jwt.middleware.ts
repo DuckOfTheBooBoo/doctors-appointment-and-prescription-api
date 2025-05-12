@@ -31,6 +31,9 @@ export function jwtMiddleware(req: Request, res: Response, next: NextFunction) {
         const payload = verifyToken(tokenSplit[1], { algorithms: ["HS256"]});
         console.log(payload);
         
+        // Menempatkan JWT yang sudah ter-dekode ke dalam request untuk digunakan dalam controller
+        req.decodedToken = payload;
+
         // Melanjutkan ke middleware/controller berikutnya
         next();
     } catch (error) {
