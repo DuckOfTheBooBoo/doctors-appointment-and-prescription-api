@@ -27,5 +27,14 @@ export const joinedQueries = {
     ON u.id = m.id
   JOIN licenses l
     ON m.license_id = l.id
-  WHERE m.status = 'pending';`
-}
+  WHERE m.status = 'pending';`,
+  // Query baru untuk mengambil user beserta role dari medical_professionals menggunakan LEFT JOIN
+  // Jika user adalah patient, maka kolom role akan bernilai NULL
+  getUserByEmail: `SELECT 
+    u.*, 
+    mp.role 
+  FROM users u 
+  LEFT JOIN medical_professionals mp 
+    ON u.id = mp.id 
+  WHERE u.email = ? AND u.is_active = 1`
+};
