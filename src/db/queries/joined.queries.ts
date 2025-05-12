@@ -36,5 +36,7 @@ export const joinedQueries = {
   FROM users u 
   LEFT JOIN medical_professionals mp 
     ON u.id = mp.id 
-  WHERE u.email = ? AND u.is_active = 1`
+  WHERE u.email = ? AND u.is_active = 1`,
+  getConsultationsByScheduleId: `SELECT * FROM consultations
+  WHERE schedule_id = ? AND user_id = ?`
 };
