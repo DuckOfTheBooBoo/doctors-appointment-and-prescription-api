@@ -9,6 +9,8 @@ import jwt from 'jsonwebtoken';
 export interface JWTPayload {
     userId: number;
     role: string;
+    iat?: number;
+    exp?: number;
 }
 
 // Fungsi untuk menandatangani dan menghasilkan token JWT
@@ -22,10 +24,10 @@ export function signToken(userId: number, role: string): string {
 }
 
 // Fungsi untuk memverifikasi token JWT yang diberikan
-export function verifyToken(token: string): JWTPayload {
+export function verifyToken(token: string, options?: jwt.VerifyOptions): JWTPayload {
     try {
         // Memverifikasi token dan mengembalikan payload jika valid
-        return jwt.verify(token, env.JWT_SECRET!) as JWTPayload;
+        return jwt.verify(token, env.JWT_SECRET as string, options) as JWTPayload;
     } catch (error) {
         // Melempar error JWTInvalidError jika token tidak valid
         throw new JWTInvalidError("Invalid token");
