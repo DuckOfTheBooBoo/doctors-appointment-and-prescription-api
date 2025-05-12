@@ -60,8 +60,7 @@ export async function loginService(email: string, password: string): Promise<str
         const token = signToken(data.id, role);
         return token;
     } catch (error) {
-        // Mencetak error jika terjadi masalah saat autentikasi
-        console.error("Error while authenticating user:", error);
+        // Lempar error jika terjadi masalah saat autentikasi
         throw error;
     }
 }
