@@ -1,15 +1,36 @@
 import { db } from "@/db";
+import { medicineQueries } from "@/db/queries/medicine.queries";
+import { NotFoundError } from "@/errors";
 import { Medicine } from "@/models/medicine.model";
-import { type ResultSetHeader } from "mysql2/promise";
+import { RowDataPacket, type ResultSetHeader } from "mysql2/promise";
 
 export async function addMedicineService(input: { name: string; stock: number }): Promise<Medicine> {
     const { name, stock } = input;
-    const insertQuery = `INSERT INTO medicines (name, stock) VALUES (?,?)`;
     try {
-        const result = await db.execute(insertQuery, [name, stock]);
+        const result = await db.execute(medicineQueries.create, [name, stock]);
         const insertId = (result as ResultSetHeader).insertId;
         return new Medicine(insertId, name, stock);
     } catch (error) {
         throw error;
     }
+}
+
+interface MedicineRow extends RowDataPacket {
+    id: number;
+    name: string;
+    stock: number;
+}
+
+export async function updateMedicineStockService(id: number, newStock: number): Promise<Medicine> {
+	try {
+		await db.execute(medicineQueries.updateStock, [newStock, id]);
+		// Fetch the updated record
+		const rows = await db.query<MedicineRow[]>(medicineQueries.getById, [id]);
+		// Assuming rows is an array and the first element is the result row
+		const record = rows[0];
+		if (!record) throw new NotFoundError("Medicine not found");
+		return new Medicine(record.id, record.name, record.stock);
+	} catch (error) {
+		throw error;
+	}
 }
