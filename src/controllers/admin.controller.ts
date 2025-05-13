@@ -2,6 +2,7 @@
 import { pendingRegistrationsService, approveInvitationService } from "@/services/admin.service";
 // Mengimpor tipe Request dan Response dari express
 import type { Request, Response } from "express";
+import { z } from "zod";
 
 // Fungsi untuk mengambil semua pending registrations
 export async function pendingRegistrations(_: Request, res: Response) {
@@ -10,49 +11,54 @@ export async function pendingRegistrations(_: Request, res: Response) {
         const data = await pendingRegistrationsService();
 
         // Mengirim response sukses dengan data yang diambil
-        return res.status(200).json({
+        res.status(200).json({
             message: null,
             data
         });
+        return;
     } catch (error) {
         // Mencetak error dan mengirim response 500 jika terjadi masalah
         console.error("Error during fetching all pending registrations:", error);
-        return res.status(500).json({
+        res.status(500).json({
             message: "Something went wrong. Please try again later."
         });
+        return;
     }
 }
 
 export async function approveRegistration(req: Request, res: Response) {
     try {
-        const { invitationId, password } = req.body;
+        const { user_id } = req.body;
 
-        // Validasi input
-        if (!invitationId || !password) {
-            return res.status(400).json({
-                message: "invitationId dan password wajib diisi."
+        const approveRegistrationSchema = z.object({
+            user_id: z.number().nonnegative(),
+        });
+
+        const validation = approveRegistrationSchema.safeParse(req.body);
+
+        if (!validation.success) {
+            res.status(400).json({
+                message: "Validation failed.",
+                errors: validation.error.errors,
             });
+            return;
         }
 
         // Proses approval via service
-        const result = await approveInvitationService(invitationId, password);
+        const result = await approveInvitationService(validation.data.user_id);
 
         // Berhasil
-        return res.status(200).json({
+        res.status(200).json({
             message: "User invitation approved successfully.",
             data: result
         });
+        return;
     } catch (error) {
         console.error("Error approving invitation:", error);
-        return res.status(500).json({
+        res.status(500).json({
             message: "Failed to approve user invitation."
         });
+        return;
     }
-    
-    // Add this return statement at the end of the function
-    // This satisfies TypeScript's control flow analysis
-    return res.status(500).json({
-        message: "Unexpected error occurred."
-    });
 }
 

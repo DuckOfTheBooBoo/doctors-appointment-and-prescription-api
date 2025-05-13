@@ -1,5 +1,5 @@
 // Mengimpor fungsi pendingRegistrations dari controller admin
-import { pendingRegistrations } from "@/controllers/admin.controller";
+import { pendingRegistrations, approveRegistration } from "@/controllers/admin.controller";
 // Mengimpor middleware adminAuth untuk otorisasi admin
 import { adminAuth } from "@/middlewares/admin.middleware";
 // Mengimpor Router dari express

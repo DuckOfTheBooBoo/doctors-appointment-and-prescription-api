@@ -2,16 +2,16 @@
 import { db } from "@/db";
 // Mengimpor query joined untuk mengambil pending registrations
 import { joinedQueries } from "@/db/queries/joined.queries";
+import { NotFoundError } from "@/errors";
 // Mengimpor model License
 import { License } from "@/models/license.model";
 // Mengimpor model MedicalProfessional
 import { MedicalProfessional } from "@/models/medicalProfessional.model";
 // Mengimpor tipe LicenseInput
 import { LicenseInput } from "@/types/common";
+import { generateToken } from "@/utils/tokenGenerator";
 // Mengimpor RowDataPacket dari mysql2
 import { RowDataPacket } from "mysql2";
-// Untuk hash password
-import bcrypt from "bcrypt";
 
 // Mendefinisikan interface PendingRegistrationsRow untuk tipe baris dari query
 interface PendingRegistrationsRow extends RowDataPacket {
@@ -72,15 +72,28 @@ export async function pendingRegistrationsService(): Promise<MedicalProfessional
 }
 
 // Fungsi untuk approve user (update work_status dan set password)
-export async function approveInvitationService(invitationId: number, password: string): Promise<void> {
+export async function approveInvitationService(userId: number): Promise<void> {
     try {
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const updateQuery = `
-            UPDATE users 
-            SET work_status = 'active', password = ? 
-            WHERE id = ?
-        `;
-        await db.execute(updateQuery, [hashedPassword, invitationId]);
+        // const hashedPassword = await bcrypt.hash(password, 10);
+        // const updateQuery = `
+        //     UPDATE users 
+        //     SET work_status = 'active', password = ? 
+        //     WHERE id = ?
+        // `;
+        // await db.execute(updateQuery, [hashedPassword, invitationId]);
+
+        // 1. Cek apakah user_id ada di table users
+        //    - Jika tidak ada, lempar NotFoundError
+        //      throw new NotFoundError("User doesn't exists");
+        // 2. Jika ada, buat token dengan memanggil fungsi generateToken()
+        // 3. Setelah token dibuat, masukkan user_id dan token ke table user_invitations dengan db.execute
+        //    - INSERT INTO user_invitation (user_id, token) VALUES (?,?);
+        // 4. Return data yang sudah dibuat ke controller dengan format
+        //    {
+        //        "user_id": <user_id>,
+        //        "token": <token>,
+        //        "endpoint": "auth/set-password?token=<invitation_token>"
+        //    }
     } catch (error) {
         throw error;
     }

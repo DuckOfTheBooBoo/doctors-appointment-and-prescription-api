@@ -51,6 +51,10 @@ export async function createConsultation(req: Request, res: Response) {
     }
 }
 
+// export async function getPrescription(req: Request, res: Response) {
+    
+// }
+
 export async function createPrescription(req: Request, res: Response): Promise<void> {
     // Validate consultation_id param
     const paramsSchema = z.object({
