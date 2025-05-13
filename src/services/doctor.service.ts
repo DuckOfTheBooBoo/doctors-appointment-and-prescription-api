@@ -130,6 +130,23 @@ export async function addDoctorScheduleService(doctorId: number, body: { date: s
     }
 }
 
+export async function updateDoctorScheduleService(doctorId: number, scheduleId: number, body: { date: string; start_hour: number; end_hour: number }): Promise<Schedule> {
+    try {
+        const result = await db.execute(
+            scheduleQueries.update,
+            [body.date, body.start_hour, body.end_hour, scheduleId, doctorId]
+        );
+        if (result.affectedRows === 0) {
+            throw new NotFoundError("Schedule not found or unauthorized");
+        }
+        const rows = await db.query<any[]>(scheduleQueries.getById, [scheduleId]);
+        const scheduleRow = rows[0];
+        return new Schedule(scheduleRow.id, scheduleRow.doctor_id, new Date(scheduleRow.date), scheduleRow.start_hour, scheduleRow.end_hour);
+    } catch (error) {
+        throw error;
+    }
+}
+
 interface DoctorInfoRow extends RowDataPacket {
     id: number;
     prefix: string | null;

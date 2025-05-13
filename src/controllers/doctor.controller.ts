@@ -1,6 +1,6 @@
 // Mengimpor fungsi service untuk membuat doctor
 import { NotFoundError } from "@/errors";
-import { addDoctorScheduleService, createDoctorService, getDoctorDetailsService, getDoctorsService } from "@/services/doctor.service";
+import { addDoctorScheduleService, createDoctorService, getDoctorDetailsService, getDoctorsService, updateDoctorScheduleService } from "@/services/doctor.service";
 // Mengimpor tipe DoctorInput
 import { DoctorInput } from "@/types/common";
 // Mengimpor tipe Request dan Response dari express
@@ -190,6 +190,75 @@ export async function addSchedule(req: Request, res: Response): Promise<void> {
         res.status(500).json({
             message: "Something went wrong."
         });
+    }
+}
+
+export async function updateSchedule(req: Request, res: Response): Promise<void> {
+    // Validate route parameters: doctor_id and schedule_id
+    const paramsSchema = z.object({
+        doctor_id: z.preprocess((val) => typeof val === "string" ? parseInt(val, 10) : val, z.number().int()),
+        schedule_id: z.preprocess((val) => typeof val === "string" ? parseInt(val, 10) : val, z.number().int())
+    });
+    const paramsResult = paramsSchema.safeParse(req.params);
+    if (!paramsResult.success) {
+        const errors = paramsResult.error.errors.map(error => ({
+            field: error.path[0],
+            error: error.message
+        }));
+        res.status(400).json({ message: "Validation failed", errors });
+        return;
+    }
+    const { doctor_id, schedule_id } = paramsResult.data;
+    
+    // Ensure the doctor updating the schedule matches the logged in user
+    if (doctor_id !== req.decodedToken.userId) {
+        res.status(403).json({ message: "You're not authorized to update this schedule" });
+        return;
+    }
+    
+    // Validate request body using similar schema from addSchedule
+    const scheduleSchema = z.object({
+        date: z.string()
+            .regex(/^\d{4}-\d{2}-\d{2}$/, "Date format is incorrect (YYYY-MM-DD)")
+            .refine((date) => {
+                const today = new Date();
+                const inputDate = new Date(date);
+                today.setHours(0, 0, 0, 0);
+                return inputDate >= today;
+            }, "Date must be today or in the future"),
+        start_hour: z.number()
+            .min(0, "Start hour must be between 0 and 23")
+            .max(23, "Start hour must be between 0 and 23"),
+        end_hour: z.number()
+            .min(0, "End hour must be between 0 and 23")
+            .max(23, "End hour must be between 0 and 23")
+    }).refine(data => data.end_hour > data.start_hour, {
+        message: "End hour must be greater than start hour",
+        path: ["end_hour"]
+    });
+    const bodyResult = scheduleSchema.safeParse(req.body);
+    if (!bodyResult.success) {
+        const errors = bodyResult.error.errors.map(error => ({
+            field: error.path[0],
+            error: error.message
+        }));
+        res.status(400).json({ message: "Validation failed", errors });
+        return;
+    }
+    
+    try {
+        const updatedSchedule = await updateDoctorScheduleService(doctor_id, schedule_id, req.body);
+        res.status(200).json({
+            message: "Schedule updated successfully",
+            data: updatedSchedule
+        });
+    } catch (error) {
+        console.error(error);
+        if (error instanceof NotFoundError) {
+            res.status(404).json({ message: error.message });
+            return;
+        }
+        res.status(500).json({ message: "Something went wrong." });
     }
 }
 
