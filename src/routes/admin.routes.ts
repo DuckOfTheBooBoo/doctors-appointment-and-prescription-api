@@ -10,4 +10,7 @@ const adminRouter = Router(); // Membuat instance router untuk admin
 adminRouter.use(adminAuth); // Menggunakan middleware adminAuth untuk autentikasi admin
 adminRouter.get("/pending-registrations", pendingRegistrations); // Mendefinisikan route GET untuk pending registrations
 
+// Endpoint untuk menyetujui pendaftaran user
+adminRouter.post("/approve-registration", approveRegistration);
+
 export default adminRouter; // Mengekspor router admin
