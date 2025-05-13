@@ -10,6 +10,8 @@ import { MedicalProfessional } from "@/models/medicalProfessional.model";
 import { LicenseInput } from "@/types/common";
 // Mengimpor RowDataPacket dari mysql2
 import { RowDataPacket } from "mysql2";
+// Untuk hash password
+import bcrypt from "bcrypt";
 
 // Mendefinisikan interface PendingRegistrationsRow untuk tipe baris dari query
 interface PendingRegistrationsRow extends RowDataPacket {
@@ -40,14 +42,10 @@ interface PendingRegistrationsRow extends RowDataPacket {
 // Fungsi untuk mengambil semua registrasi pending
 export async function pendingRegistrationsService(): Promise<MedicalProfessional[]> {
     try {
-        // Inisialisasi array untuk menyimpan objek MedicalProfessional
         const pendingRegistrations: MedicalProfessional[] = [];
-        // Eksekusi query untuk mendapatkan semua pending registrations
         const rows = await db.query<PendingRegistrationsRow[]>(joinedQueries.getAllPendingRegistrations);
-        
-        // Iterasi setiap baris dan mapping ke objek MedicalProfessional
+
         rows.forEach(pd => {
-            // Membuat instance License dengan data dari query
             const license = new License({
                 id: pd.license_id,
                 number: pd.number,
@@ -57,18 +55,33 @@ export async function pendingRegistrationsService(): Promise<MedicalProfessional
                 status: pd.license_status,
                 specialty: pd.specialty
             } as LicenseInput);
-            // Membuat instance MedicalProfessional dengan data dari query
+
             const md = new MedicalProfessional(
                 pd.id, pd.prefix, pd.suffix, pd.first_name, pd.last_name, pd.date_of_birth,
                 pd.gender, pd.phone, null, null, pd.address, pd.is_active, pd.created_at, pd.created_at,
                 pd.role, pd.specialization, license
             );
+
             pendingRegistrations.push(md);
         });
-        // Mengembalikan array yang telah terisi
+
         return pendingRegistrations;
     } catch (error) {
-        // Melempar error jika terjadi kesalahan
+        throw error;
+    }
+}
+
+// Fungsi untuk approve user (update work_status dan set password)
+export async function approveInvitationService(invitationId: number, password: string): Promise<void> {
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const updateQuery = `
+            UPDATE users 
+            SET work_status = 'active', password = ? 
+            WHERE id = ?
+        `;
+        await db.execute(updateQuery, [hashedPassword, invitationId]);
+    } catch (error) {
         throw error;
     }
 }
