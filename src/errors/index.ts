@@ -41,3 +41,25 @@ export class NotFoundError extends Error {
         Error.captureStackTrace(this);
     }
 }
+
+// Mendefinisikan error untuk stok medicine yang habis
+export class InsufficientStockError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "InsufficientStockError";
+
+        Object.setPrototypeOf(this, new.target.prototype);
+        Error.captureStackTrace(this);
+    }
+}
+
+// Mendefinisikan error untuk otorisasi yang tidak terpenuhi
+export class InsufficientAuthorizationError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = "InsufficientAuthorizationError";
+
+        Object.setPrototypeOf(this, new.target.prototype);
+        Error.captureStackTrace(this);
+    }
+}
