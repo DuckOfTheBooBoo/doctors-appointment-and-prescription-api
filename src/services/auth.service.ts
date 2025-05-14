@@ -64,28 +64,49 @@ export async function loginService(email: string, password: string): Promise<str
         throw error;
     }
 }
+
 // Fungsi untuk mengatur password baru
-    export async function setPassword(token: string, password: string) : Promise<string> {
+export async function setPassword(token: string, password: string): Promise<string> {
     try {
-    // Mencari user berdasarkan email yang diberikan
-        const tokenResult = await db.query("SELECT * FROM user_invitations WHERE token = ?", [token]);
-        if (tokenResult.length === 0) {
-            throw new NotFoundError("Invitation not found");
-        }
-        const userId = tokenResult[0].user_id;
-        
-    // Hash password baru sebelum menyimpannya
-        const hashedNewPassword = await hashPassword(password);
-            
-    // Update password di database
-        await db.execute("UPDATE users SET password = ?, is_active = 1 WHERE id = ?;", [hashedNewPassword, userId]);
-        await db.execute("UPDATE medical_professionals SET status = 'active' WHERE id = ?", [userId]);
+        return await db.transaction<string>(async (connection) => {
+            // Find invitation by token
+            const [tokenResult] = await connection.query<RowDataPacket[]>("SELECT * FROM user_invitations WHERE token = ?", [token]);
+            if (tokenResult.length === 0) {
+                throw new NotFoundError("Invitation not found");
+            }
+            const userId = tokenResult[0].user_id;
 
-    // Kembalikan pesan sukses jika password berhasil diubah
-        return 'Password berhasil diubah';
-        } catch (error) {
+            // Check if user is not already activated
+            const [userResult] = await connection.query<RowDataPacket[]>("SELECT * FROM users WHERE id = ? AND is_active = 0", [userId]);
+            if (userResult.length === 0) {
+                throw new NotFoundError("User may have been already activated.");
+            }
 
-     // Lempar error jika terjadi masalah saat update password
+            // Hash the new password before saving it
+            const hashedNewPassword = await hashPassword(password);
+
+            // Update the user's password and activate the account
+            await connection.execute(
+                "UPDATE users SET password = ?, is_active = 1 WHERE id = ?;", 
+                [hashedNewPassword, userId]
+            );
+
+            // Update the status in medical_professionals table
+            await connection.execute(
+                "UPDATE medical_professionals SET status = 'active' WHERE id = ?", 
+                [userId]
+            );
+
+            // Delete the invitation token
+            await connection.execute(
+                "DELETE FROM user_invitations WHERE token = ?", 
+                [token]
+            );
+
+            return 'Set password successful. You may log in';
+        });
+    } catch (error) {
+        // Propagate error if any step fails during the transaction
         throw error;
     }
 }
