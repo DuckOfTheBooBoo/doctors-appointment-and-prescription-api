@@ -72,28 +72,30 @@ export async function pendingRegistrationsService(): Promise<MedicalProfessional
 }
 
 // Fungsi untuk approve user (update work_status dan set password)
-export async function approveInvitationService(userId: number): Promise<void> {
+export async function approveInvitationService(userId: number): Promise<{ user_id: number, token: string, endpoint: string }> {
     try {
-        // const hashedPassword = await bcrypt.hash(password, 10);
-        // const updateQuery = `
-        //     UPDATE users 
-        //     SET work_status = 'active', password = ? 
-        //     WHERE id = ?
-        // `;
-        // await db.execute(updateQuery, [hashedPassword, invitationId]);
-
         // 1. Cek apakah user_id ada di table users
-        //    - Jika tidak ada, lempar NotFoundError
-        //      throw new NotFoundError("User doesn't exists");
+            const userQuery = `SELECT * FROM users WHERE id = ?`;
+            const userRows = await db.execute(userQuery, [userId]);
+
+            // Cek apakah data ditemukan
+            if ((userRows as unknown as RowDataPacket[]).length === 0) {
+            throw new NotFoundError("User doesn't exist");
+            }
+
         // 2. Jika ada, buat token dengan memanggil fungsi generateToken()
+        const token = generateToken(userId);
+
         // 3. Setelah token dibuat, masukkan user_id dan token ke table user_invitations dengan db.execute
-        //    - INSERT INTO user_invitation (user_id, token) VALUES (?,?);
+        const insertQuery = `INSERT INTO user_invitations (user_id, token) VALUES (?, ?)`;
+        await db.execute(insertQuery, [userId, token]);
+
         // 4. Return data yang sudah dibuat ke controller dengan format
-        //    {
-        //        "user_id": <user_id>,
-        //        "token": <token>,
-        //        "endpoint": "auth/set-password?token=<invitation_token>"
-        //    }
+        return {
+            user_id: userId,
+            token: token,
+            endpoint: `auth/set-password?token=${token}`
+        };
     } catch (error) {
         throw error;
     }
