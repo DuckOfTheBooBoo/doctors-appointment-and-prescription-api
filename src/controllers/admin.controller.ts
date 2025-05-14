@@ -1,4 +1,5 @@
 // Mengimpor fungsi service untuk mengambil pending registrations
+import { NotFoundError } from "@/errors";
 import { pendingRegistrationsService, approveInvitationService } from "@/services/admin.service";
 // Mengimpor tipe Request dan Response dari express
 import type { Request, Response } from "express";
@@ -53,6 +54,13 @@ export async function approveRegistration(req: Request, res: Response) {
         });
         return;
     } catch (error) {
+        if (error instanceof NotFoundError) {
+            res.status(404).json({
+                message: error.message
+            });
+            return;
+        }
+
         console.error("Error approving invitation:", error);
         res.status(500).json({
             message: "Failed to approve user invitation."

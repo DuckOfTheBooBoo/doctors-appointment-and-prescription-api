@@ -74,17 +74,17 @@ export async function pendingRegistrationsService(): Promise<MedicalProfessional
 // Fungsi untuk approve user (update work_status dan set password)
 export async function approveInvitationService(userId: number): Promise<{ user_id: number, token: string, endpoint: string }> {
     try {
-        // 1. Cek apakah user_id ada di table users
-            const userQuery = `SELECT * FROM users WHERE id = ?`;
-            const userRows = await db.execute(userQuery, [userId]);
+        // 1. Cek apakah user_id dengan status belum aktif ada di table users
+        const userQuery = `SELECT * FROM users WHERE id = ? AND is_active = 0`;
+        const userRows = await db.query(userQuery, [userId]);
 
-            // Cek apakah data ditemukan
-            if ((userRows as unknown as RowDataPacket[]).length === 0) {
-            throw new NotFoundError("User doesn't exist");
-            }
+        // Cek apakah data ditemukan
+        if (userRows.length === 0) {
+            throw new NotFoundError("User doesn't exists or may have been activated.");
+        }
 
         // 2. Jika ada, buat token dengan memanggil fungsi generateToken()
-        const token = generateToken(userId);
+        const token = generateToken();
 
         // 3. Setelah token dibuat, masukkan user_id dan token ke table user_invitations dengan db.execute
         const insertQuery = `INSERT INTO user_invitations (user_id, token) VALUES (?, ?)`;
@@ -94,7 +94,7 @@ export async function approveInvitationService(userId: number): Promise<{ user_i
         return {
             user_id: userId,
             token: token,
-            endpoint: `auth/set-password?token=${token}`
+            endpoint: `/auth/set-password?token=${token}`
         };
     } catch (error) {
         throw error;
