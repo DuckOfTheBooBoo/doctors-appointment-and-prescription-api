@@ -28,7 +28,6 @@ export async function pendingRegistrations(_: Request, res: Response) {
 
 export async function approveRegistration(req: Request, res: Response) {
     try {
-        const { user_id } = req.body;
 
         const approveRegistrationSchema = z.object({
             user_id: z.number().nonnegative(),
