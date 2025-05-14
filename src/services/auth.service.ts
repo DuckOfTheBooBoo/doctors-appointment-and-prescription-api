@@ -3,10 +3,10 @@ import { db } from "@/db";
 import { joinedQueries } from "@/db/queries/joined.queries";
 // Mengimpor query user dari "@/db/queries/user.queries"
 // Mengimpor error InvalidCredentialsError
-import { InvalidCredentialsError } from "@/errors";
+import { InvalidCredentialsError, NotFoundError } from "@/errors";
 // Mengimpor model User
 // Mengimpor fungsi checkPassword
-import { checkPassword } from "@/utils/bcrypt";
+import { checkPassword, hashPassword } from "@/utils/bcrypt";
 // Mengimpor fungsi signToken untuk membuat token JWT
 import { signToken } from "@/utils/jwt";
 // Mengimpor RowDataPacket untuk tipe data query
@@ -46,7 +46,7 @@ export async function loginService(email: string, password: string): Promise<str
         // const user = new User(
         //     data.id, data.prefix, data.suffix, data.first_name, data.last_name,
         //     data.date_of_birth, data.gender, data.phone, data.email, data.password, data.address,
-        //     true, new Date(), new Date()
+        //     true, new Date(), new Date() 
         // );
         // Memeriksa kecocokan password menggunakan fungsi checkPassword
         const isValid = await checkPassword(password, data.password);
@@ -61,6 +61,31 @@ export async function loginService(email: string, password: string): Promise<str
         return token;
     } catch (error) {
         // Lempar error jika terjadi masalah saat autentikasi
+        throw error;
+    }
+}
+// Fungsi untuk mengatur password baru
+    export async function setPassword(token: string, password: string) : Promise<string> {
+    try {
+    // Mencari user berdasarkan email yang diberikan
+        const tokenResult = await db.query("SELECT * FROM user_invitations WHERE token = ?", [token]);
+        if (tokenResult.length === 0) {
+            throw new NotFoundError("Invitation not found");
+        }
+        const userId = tokenResult[0].user_id;
+        
+    // Hash password baru sebelum menyimpannya
+        const hashedNewPassword = await hashPassword(password);
+            
+    // Update password di database
+        await db.execute("UPDATE users SET password = ?, is_active = 1 WHERE id = ?;", [hashedNewPassword, userId]);
+        await db.execute("UPDATE medical_professionals SET status = 'active' WHERE id = ?", [userId]);
+
+    // Kembalikan pesan sukses jika password berhasil diubah
+        return 'Password berhasil diubah';
+        } catch (error) {
+
+     // Lempar error jika terjadi masalah saat update password
         throw error;
     }
 }

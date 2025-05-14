@@ -1,10 +1,8 @@
-// Mengimpor fungsi login dari controller auth
-import { login } from "@/controllers/auth.controller";
-// Mengimpor Router dari express
+import { login, setPasswordController } from "@/controllers/auth.controller";
 import { Router } from "express";
 
-const authRouter = Router(); // Membuat instance router untuk auth
+const authRouter = Router();
+authRouter.post("/login", login);
+authRouter.put("/set-password", setPasswordController);
 
-authRouter.post("/login", login); // Mendefinisikan route POST untuk login
-
-export default authRouter; // Mengekspor router auth
+export default authRouter;

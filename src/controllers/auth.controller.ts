@@ -1,7 +1,9 @@
 // Mengimpor error InvalidCredentialsError
+import { db } from "@/db";
 import { InvalidCredentialsError } from "@/errors";
 // Mengimpor fungsi loginService dari service auth
 import { loginService } from "@/services/auth.service";
+import { hashPassword } from "@/utils/bcrypt";
 // Mengimpor tipe Request dan Response dari express
 import type { Request, Response } from "express";
 // Mengimpor modul zod untuk validasi
@@ -63,3 +65,50 @@ export async function login(req: Request, res: Response) {
         });
     }
 }
+
+export const setPasswordController = async (req: Request, res: Response) => {
+  const { token, password } = req.body;
+
+  try {
+    // Validasi input dasar
+    if (!token || !password) {
+      res.status(400).json({ message: "Token dan password wajib diisi." });
+      return;
+    }
+
+    // Cari data invitation berdasarkan token
+    const [tokenResult]: any = await db.query(
+      "SELECT * FROM user_invitations WHERE token = ?",
+      [token]
+    );
+
+    if (tokenResult.length === 0) {
+      res.status(404).json({ message: "Invitation tidak ditemukan." });
+      return;
+    }
+
+    const userId = tokenResult[0].user_id;
+
+    // Hash password baru
+    const hashedPassword = await hashPassword(password);
+
+    // Update password dan aktivasi akun
+    await db.execute(
+      "UPDATE users SET password = ?, is_active = 1 WHERE id = ?",
+      [hashedPassword, userId]
+    );
+
+    // Update status tenaga medis jadi 'active' (jika applicable)
+    await db.execute(
+      "UPDATE medical_professionals SET status = 'active' WHERE id = ?",
+      [userId]
+    );
+
+    res.status(200).json({ message: "Password berhasil diatur." });
+    return;
+  } catch (error) {
+    console.error("Error setPassword:", error);
+    res.status(500).json({ message: "Terjadi kesalahan saat mengatur password." });
+    return;
+  }
+};
