@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { z } from "zod";
-import { createConsultationService } from "@/services/consultation.service";
+import { createConsultationService, getConsultation } from "@/services/consultation.service";
 import { createPrescriptionService } from "@/services/consultation.service";
 import { DuplicateError, InsufficientAuthorizationError, InsufficientStockError, NotFoundError } from "@/errors";
 
@@ -51,9 +51,62 @@ export async function createConsultation(req: Request, res: Response) {
     }
 }
 
-// export async function getPrescription(req: Request, res: Response) {
-    
-// }
+export async function getConsultationSummary(req: Request, res: Response) {
+
+    const paramsSchema = z.object({
+        consultation_id: z.preprocess((val) => typeof val === "string" ? parseInt(val, 10) : val, z.number().int())
+    });
+
+    const valResult = paramsSchema.safeParse(req.params);
+
+    if (!valResult.success) {
+        const errors = valResult.error.errors.map(err => ({
+            field: err.path[0],
+            error: err.message
+        }));
+        res.status(400).json({
+            message: "Validation failed",
+            errors
+        })
+        return;
+    }
+
+    try {
+        const consultationSummary = await getConsultation(
+            valResult.data.consultation_id,
+            req.decodedToken.userId,
+            req.decodedToken.role
+        );
+
+        res.status(200).json({
+            message: consultationSummary.prescription ? "Consultation ended" : "Consultation ongoing",
+            data: consultationSummary
+        })
+        return;
+    } catch (error) {
+        if (error instanceof InsufficientAuthorizationError) {
+            res.status(403).json({
+                message: "You're not authorized to make this request"
+            });
+            return;
+        }
+
+        if (error instanceof NotFoundError) {
+            res.status(404).json({
+                message: "Consultation not found"
+            });
+            return;
+        }
+
+        console.error(error);
+        res.status(500).json({
+            messsage: "Something went wrong."
+        });
+        return;
+    }
+
+
+}
 
 export async function createPrescription(req: Request, res: Response): Promise<void> {
     // Validate consultation_id param
