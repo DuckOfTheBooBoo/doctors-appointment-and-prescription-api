@@ -1,6 +1,6 @@
 // Mengimpor fungsi service untuk membuat doctor
 import { NotFoundError } from "@/errors";
-import { addDoctorScheduleService, createDoctorService, getDoctorDetailsService, getDoctorsService, updateDoctorScheduleService } from "@/services/doctor.service";
+import { addDoctorScheduleService, createDoctorService, deactivateMedicalProfessionalService, getDoctorDetailsService, getDoctorsService, updateDoctorScheduleService } from "@/services/doctor.service";
 // Mengimpor tipe DoctorInput
 import { DoctorInput } from "@/types/common";
 // Mengimpor tipe Request dan Response dari express
@@ -292,6 +292,39 @@ export async function getDoctorDetails(req: Request, res: Response) {
         }
 
         console.error(error);
+        res.status(500).json({
+            message: "Something went wrong."
+        });
+    }
+}
+
+export async function deactivateDoctor(req: Request, res: Response) {
+    const { doctor_id } = req.params;
+    const doctorId = parseInt(doctor_id, 10);
+    if (isNaN(doctorId)) {
+        res.status(400).json({
+            message: "Validation failed",
+            errors: [
+                { field: "doctor_id", message: "doctor_id should be a number" } 
+            ]
+        });
+        return;
+    }
+
+    try {
+        // Call service to deactivate the doctor
+        await deactivateMedicalProfessionalService(doctorId);
+        res.status(200).json({
+            message: "Doctor deactivated successfully"
+        });
+    } catch (error) {
+        console.error(error);
+        if (error instanceof NotFoundError) {
+            res.status(404).json({
+                message: error.message
+            });
+            return;
+        }
         res.status(500).json({
             message: "Something went wrong."
         });

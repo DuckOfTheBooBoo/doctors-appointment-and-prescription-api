@@ -16,4 +16,5 @@ export const medicalProfessionalsQueries = {
         FROM users u 
         JOIN medical_professionals mp ON u.id = mp.id 
         WHERE u.id = ? AND mp.role = 'doctor'`,
+    deactivate: `UPDATE medical_professionals SET status = 'inactive' WHERE id = ?`,
 };

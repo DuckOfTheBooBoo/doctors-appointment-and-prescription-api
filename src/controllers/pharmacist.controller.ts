@@ -1,4 +1,6 @@
 // Mengimpor fungsi service untuk membuat pharmacist
+import { NotFoundError } from "@/errors";
+import { deactivateMedicalProfessionalService } from "@/services/doctor.service";
 import { createPharmacistService } from "@/services/pharmacist.service";
 // Mengimpor tipe PharmacistInput
 import { PharmacistInput } from "@/types/common";
@@ -75,4 +77,37 @@ export async function createPharmacist(req: Request, res: Response) {
         return;
     }
     return;
+}
+
+export async function deactivatePharmacist(req: Request, res: Response) {
+    const { pharmacist_id } = req.params;
+    const pharmacistId = parseInt(pharmacist_id, 10);
+    if (isNaN(pharmacistId)) {
+        res.status(400).json({
+            message: "Validation failed",
+            errors: [
+                { field: "pharmacist_id", message: "pharmacist_id should be a number" } 
+            ]
+        });
+        return;
+    }
+
+    try {
+        // Call service to deactivate the doctor
+        await deactivateMedicalProfessionalService(pharmacistId);
+        res.status(200).json({
+            message: "Pharmacist deactivated successfully"
+        });
+    } catch (error) {
+        console.error(error);
+        if (error instanceof NotFoundError) {
+            res.status(404).json({
+                message: error.message
+            });
+            return;
+        }
+        res.status(500).json({
+            message: "Something went wrong."
+        });
+    }
 }

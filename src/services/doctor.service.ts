@@ -191,3 +191,14 @@ export async function getDoctorDetailsService(doctorId: number, startDate?: stri
         schedules: scheduleRows
     };
 }
+
+export async function deactivateMedicalProfessionalService(medProfId: number): Promise<void> {
+    try {
+        await db.transaction(async (connection: PoolConnection) => {
+            await connection.execute(medicalProfessionalsQueries.deactivate, [medProfId]);
+            await connection.execute(userQueries.deactivate, [medProfId]);
+        });
+    } catch (error) {
+        throw error;
+    }
+}
