@@ -52,3 +52,13 @@ export async function deleteMedicineService(id: number): Promise<void> {
         throw error;
     }
 }
+
+export async function getAllMedicinesService(): Promise<Medicine[]> {
+    try {
+        const rows = await db.query(medicineQueries.getAll);
+        // Assuming rows is an array of records
+        return rows.map(row => new Medicine(row.id, row.name, row.stock));
+    } catch (error) {
+        throw error;
+    }
+}

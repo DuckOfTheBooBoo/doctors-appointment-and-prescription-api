@@ -1,5 +1,5 @@
 import { InsufficientAuthorizationError, NotFoundError } from "@/errors";
-import { addMedicineService, deleteMedicineService, updateMedicineStockService } from "@/services/medicine.service";
+import { addMedicineService, deleteMedicineService, updateMedicineStockService, getAllMedicinesService } from "@/services/medicine.service";
 import { Request, Response } from "express";
 import { z } from "zod";
 
@@ -132,5 +132,24 @@ export async function deleteMedicine(req: Request, res: Response) {
             message: "Something went wrong"
         });
         return;
+    }
+}
+
+export async function getAllMedicines(req: Request, res: Response) {
+    if (!["pharmacist"].includes(req.decodedToken.role)) {
+        res.status(403).json({
+            message: "You're not authorized to make this request"
+        });
+        return;
+    }
+    try {
+        const medicines = await getAllMedicinesService();
+        res.status(200).json({
+            message: "Medicines retrieved successfully",
+            data: medicines
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Something went wrong." });
     }
 }
