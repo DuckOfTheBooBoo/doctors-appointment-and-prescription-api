@@ -1,6 +1,6 @@
 import { Request , Response } from "express";
 import { z } from "zod";
-import { createConsultationService, getConsultation } from "@/services/consultation.service";
+import { createConsultationService, getConsultation, getConsultationsForDoctor } from "@/services/consultation.service";
 import { createPrescriptionService } from "@/services/consultation.service";
 import { DuplicateError, InsufficientAuthorizationError, InsufficientStockError, NotFoundError } from "@/errors";
 
@@ -300,3 +300,26 @@ export async function createPrescription(req: Request, res: Response): Promise<v
         res.status(500).json({ message: "Something went wrong." });
     }
 };
+
+export async function getDoctorConsultations(req: Request, res: Response) {
+	// Only doctors can request this
+	if (req.decodedToken.role !== "doctor") {
+		res.status(403).json({
+			message: "You're not authorized to make this request"
+		});
+		return;
+	}
+	
+	// Optional filter: "done" or "pending"
+	const filter = req.query.filter as string | undefined;
+	try {
+		const consultations = await getConsultationsForDoctor(req.decodedToken.userId, filter);
+		res.status(200).json({
+			message: "Consultations retrieved successfully",
+			data: consultations
+		});
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: "Something went wrong." });
+	}
+}
