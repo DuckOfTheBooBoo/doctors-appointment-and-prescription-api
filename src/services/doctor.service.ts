@@ -58,7 +58,7 @@ export async function createDoctorService(body: DoctorInput): Promise<MedicalPro
                 newDoctor.dateOfBirth,
                 newDoctor.gender,
                 newDoctor.phone,
-                null,
+                newDoctor.email,
                 null,
                 newDoctor.address,
                 false

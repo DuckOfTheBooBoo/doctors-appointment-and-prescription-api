@@ -55,7 +55,7 @@ export async function createPharmacistService(body: PharmacistInput): Promise<Me
                 newPharmacist.dateOfBirth,
                 newPharmacist.gender,
                 newPharmacist.phone,
-                null,
+                newPharmacist.email,
                 null,
                 newPharmacist.address,
                 false

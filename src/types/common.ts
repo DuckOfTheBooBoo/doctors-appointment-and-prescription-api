@@ -8,7 +8,7 @@ export interface UserInput {
     gender: "M" | "F";
     phone: string;
     address: string;
-    email: string | null;
+    email: string;
     password: string | null;
 }
 

@@ -23,7 +23,7 @@ interface PendingRegistrationsRow extends RowDataPacket {
     date_of_birth: Date;
     gender: "M" | "F";
     phone: string;
-    email: string | null;
+    email: string;
     address: string;
     is_active: boolean;
     created_at: Date;
@@ -58,7 +58,7 @@ export async function pendingRegistrationsService(): Promise<MedicalProfessional
 
             const md = new MedicalProfessional(
                 pd.id, pd.prefix, pd.suffix, pd.first_name, pd.last_name, pd.date_of_birth,
-                pd.gender, pd.phone, null, null, pd.address, pd.is_active, pd.created_at, pd.created_at,
+                pd.gender, pd.phone, pd.email, null, pd.address, pd.is_active, pd.created_at, pd.created_at,
                 pd.role, pd.specialization, license
             );
 

@@ -9,6 +9,7 @@ export const joinedQueries = {
     u.date_of_birth,
     u.gender,
     u.phone,
+    u.email,
     u.address,
     u.is_active,
     u.created_at,
