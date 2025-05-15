@@ -1,6 +1,8 @@
 {
   // Opsi compiler TypeScript
   "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
     "target": "es2016", // Target ECMAScript adalah ES2016
     "module": "commonjs", // Menggunakan sistem modul CommonJS
     "esModuleInterop": true, // Mengaktifkan interoperabilitas ES module
@@ -10,7 +12,7 @@
     "resolveJsonModule": true, // Mengizinkan impor file JSON
     "sourceMap": true, // Menghasilkan source map untuk debugging
     "declaration": true, // Menghasilkan file deklarasi (.d.ts)
-    "removeComments": true, // Menghapus komentar dari output
+    "removeComments": false, // Menghapus komentar dari output
     "noImplicitAny": true, // Tidak mengizinkan tipe any secara implisit
     "strictNullChecks": true, // Mengaktifkan pengecekan null secara ketat
     "strictFunctionTypes": true, // Memeriksa tipe fungsi secara ketat
@@ -28,6 +30,7 @@
     },
     "typeRoots": ["./src/types", "./node_modules/@types"]
   },
+  "include": ["src"],
   // Konfigurasi untuk ts-node
   "ts-node": {
         "require": ["tsconfig-paths/register"] // Meregistrasikan tsconfig-paths agar alias dapat dikenali

@@ -14,8 +14,13 @@ import adminRoutes from "./admin.routes";
 import consultationRoutes from "./consultation.routes";
 import { jwtMiddleware } from "@/middlewares/jwt.middleware";
 import medicineRoutes from "./medicine.routes";
+import swaggerUi from "swagger-ui-express";
+import swaggerConfig from "@/config/swagger.config";
+
 
 const router = Router(); // Membuat instance router utama
+
+router.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerConfig)); //  Menggunakan swagger-ui-express untuk menampilkan dokumentasi API
 
 router.use("/users", userRoutes); // Menggunakan route untuk user dengan prefix "/users"
 router.use("/auth", authRoutes); // Menggunakan route untuk auth dengan prefix "/auth"
