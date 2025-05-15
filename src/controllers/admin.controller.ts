@@ -5,6 +5,32 @@ import { pendingRegistrationsService, approveInvitationService } from "@/service
 import type { Request, Response } from "express";
 import { z } from "zod";
 
+/**
+ * @swagger
+ * /pending-registrations:
+ *   get:
+ *     summary: Get all pending user registrations
+ *     tags: [Admin]
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved pending registrations
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   nullable: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     description: User registration data
+ *       500:
+ *         description: Server error while retrieving pending registrations
+ */
+
 // Fungsi untuk mengambil semua pending registrations
 export async function pendingRegistrations(_: Request, res: Response) {
     try {
@@ -26,6 +52,56 @@ export async function pendingRegistrations(_: Request, res: Response) {
         return;
     }
 }
+
+/**
+ * @swagger
+ * /approve-registration:
+ *   post:
+ *     summary: Approve a user registration
+ *     tags: [Admin]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               user_id:
+ *                 type: number
+ *                 minimum: 0
+ *             required:
+ *               - user_id
+ *     responses:
+ *       200:
+ *         description: User invitation approved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   description: Approval result
+ *       400:
+ *         description: Validation failed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 errors:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error during approval
+ */
 
 export async function approveRegistration(req: Request, res: Response) {
     try {

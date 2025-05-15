@@ -8,6 +8,27 @@ import type { Request, Response } from "express";
 // Mengimpor modul zod untuk validasi
 import { z } from "zod";
 
+/**
+ * @swagger
+ * /doctors:
+ *   post:
+ *     summary: Create a new doctor
+ *     tags: [Doctors]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/DoctorInput'
+ *     responses:
+ *       201:
+ *         description: Doctor created successfully
+ *       400:
+ *         description: Validation failed
+ *       500:
+ *         description: Internal server error
+ */
+
 export async function createDoctor(req: Request, res: Response) {
     // Mendefinisikan schema validasi untuk data license doctor
     const licenseSchema = z.object({
@@ -90,7 +111,34 @@ export async function createDoctor(req: Request, res: Response) {
     }
     return;
 }
-
+/**
+ * @swagger
+ * /doctors:
+ *   get:
+ *     summary: Get list of doctors
+ *     tags: [Doctors]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         required: false
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         required: false
+ *       - in: query
+ *         name: specialization
+ *         schema:
+ *           type: string
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: List of doctors retrieved successfully
+ *       500:
+ *         description: Internal server error
+ */
 export async function getDoctors(req: Request, res: Response) {
     const { page = 1, limit = 10, specialization } = req.query;
 
@@ -104,7 +152,35 @@ export async function getDoctors(req: Request, res: Response) {
         });
     }
 }
-
+/**
+ * @swagger
+ * /doctors/schedules:
+ *   post:
+ *     summary: Add a schedule for the logged-in doctor
+ *     tags: [Doctors]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *               start_hour:
+ *                 type: integer
+ *               end_hour:
+ *                 type: integer
+ *     responses:
+ *       201:
+ *         description: Schedule added successfully
+ *       400:
+ *         description: Validation failed
+ *       403:
+ *         description: Unauthorized
+ *       500:
+ *         description: Internal server error
+ */
 export async function addSchedule(req: Request, res: Response): Promise<void> {
 
     if (req.decodedToken.role !== "doctor") {
@@ -173,7 +249,43 @@ export async function addSchedule(req: Request, res: Response): Promise<void> {
         });
     }
 }
-
+/**
+ * @swagger
+ * /doctors/schedules/{schedule_id}:
+ *   put:
+ *     summary: Update a schedule for the logged-in doctor
+ *     tags: [Doctors]
+ *     parameters:
+ *       - in: path
+ *         name: schedule_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *               start_hour:
+ *                 type: integer
+ *               end_hour:
+ *                 type: integer
+ *     responses:
+ *       200:
+ *         description: Schedule updated successfully
+ *       400:
+ *         description: Validation failed
+ *       403:
+ *         description: Unauthorized
+ *       404:
+ *         description: Not found
+ *       500:
+ *         description: Internal server error
+ */
 export async function updateSchedule(req: Request, res: Response): Promise<void> {
     // Validate route parameters: doctor_id and schedule_id
     const paramsSchema = z.object({
@@ -243,7 +355,38 @@ export async function updateSchedule(req: Request, res: Response): Promise<void>
         res.status(500).json({ message: "Something went wrong." });
     }
 }
-
+/**
+ * @swagger
+ * /doctors/{doctor_id}:
+ *   get:
+ *     summary: Get details of a doctor by ID
+ *     tags: [Doctors]
+ *     parameters:
+ *       - in: path
+ *         name: doctor_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *       - in: query
+ *         name: start_date
+ *         schema:
+ *           type: string
+ *         required: false
+ *       - in: query
+ *         name: end_date
+ *         schema:
+ *           type: string
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: Doctor details retrieved successfully
+ *       400:
+ *         description: Validation failed
+ *       404:
+ *         description: Doctor not found
+ *       500:
+ *         description: Internal server error
+ */
 export async function getDoctorDetails(req: Request, res: Response) {
     const { doctor_id } = req.params;
     const doctorId = parseInt(doctor_id, 10);
@@ -279,6 +422,29 @@ export async function getDoctorDetails(req: Request, res: Response) {
         });
     }
 }
+
+/**
+ * @swagger
+ * /doctors/{doctor_id}:
+ *   delete:
+ *     summary: Deactivate a doctor by ID
+ *     tags: [Doctors]
+ *     parameters:
+ *       - in: path
+ *         name: doctor_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Doctor deactivated successfully
+ *       400:
+ *         description: Validation failed
+ *       404:
+ *         description: Doctor not found
+ *       500:
+ *         description: Internal server error
+ */
 
 export async function deactivateDoctor(req: Request, res: Response) {
     const { doctor_id } = req.params;

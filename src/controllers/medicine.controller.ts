@@ -3,6 +3,40 @@ import { addMedicineService, deleteMedicineService, updateMedicineStockService, 
 import { Request, Response } from "express";
 import { z } from "zod";
 
+/**
+ * @swagger
+ * /medicines:
+ *   post:
+ *     summary: Add a new medicine
+ *     tags: [Medicine]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - stock
+ *             properties:
+ *               name:
+ *                 type: string
+ *               stock:
+ *                 type: integer
+ *                 minimum: 0
+ *     responses:
+ *       201:
+ *         description: Medicine added successfully
+ *       400:
+ *         description: Validation failed
+ *       403:
+ *         description: Not authorized
+ *       500:
+ *         description: Server error
+ */
+
 export async function addMedicine(req: Request, res: Response) {
 
     if (!['pharmacist'].includes(req.decodedToken.role)) {
@@ -38,6 +72,46 @@ export async function addMedicine(req: Request, res: Response) {
         res.status(500).json({ message: "Something went wrong." });
     }
 }
+
+/**
+ * @swagger
+ * /medicines/{medicine_id}:
+ *   patch:
+ *     summary: Update stock of a medicine
+ *     tags: [Medicine]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: medicine_id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: ID of the medicine to update
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - stock
+ *             properties:
+ *               stock:
+ *                 type: integer
+ *                 minimum: 0
+ *     responses:
+ *       200:
+ *         description: Medicine stock updated successfully
+ *       400:
+ *         description: Validation failed
+ *       403:
+ *         description: Not authorized
+ *       404:
+ *         description: Medicine not found
+ *       500:
+ *         description: Server error
+ */
 
 export async function updateMedicineStock(req: Request, res: Response) {
     // Check permissions like in addMedicine
@@ -95,6 +169,32 @@ export async function updateMedicineStock(req: Request, res: Response) {
     }
 }
 
+/**
+ * @swagger
+ * /medicines/{medicine_id}:
+ *   delete:
+ *     summary: Delete a medicine
+ *     tags: [Medicine]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: medicine_id
+ *         schema:
+ *           type: integer
+ *         required: true
+ *         description: ID of the medicine to delete
+ *     responses:
+ *       200:
+ *         description: Medicine deleted successfully
+ *       400:
+ *         description: Validation failed
+ *       403:
+ *         description: Not authorized
+ *       500:
+ *         description: Server error
+ */
+
 export async function deleteMedicine(req: Request, res: Response) {
     const paramsSchema = z.object({
         medicine_id: z.preprocess((val) => typeof val === "string" ? parseInt(val, 10) : val, z.number().int())
@@ -134,6 +234,34 @@ export async function deleteMedicine(req: Request, res: Response) {
         return;
     }
 }
+
+/**
+ * @swagger
+ * /medicines:
+ *   get:
+ *     summary: Get all medicines
+ *     tags: [Medicine]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Medicines retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       403:
+ *         description: Not authorized
+ *       500:
+ *         description: Server error
+ */
 
 export async function getAllMedicines(req: Request, res: Response) {
     if (!["pharmacist"].includes(req.decodedToken.role)) {

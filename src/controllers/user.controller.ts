@@ -9,6 +9,65 @@ import type { Request, Response } from 'express';
 // Mengimpor modul zod untuk validasi
 import { z } from 'zod';
 
+/**
+ * @swagger
+ * /users:
+ *   post:
+ *     summary: Create a new user account
+ *     tags:
+ *       - Users
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - first_name
+ *               - date_of_birth
+ *               - gender
+ *               - email
+ *               - password
+ *               - phone
+ *               - address
+ *             properties:
+ *               first_name:
+ *                 type: string
+ *                 example: John
+ *               date_of_birth:
+ *                 type: string
+ *                 format: date
+ *                 example: 1990-01-01
+ *               gender:
+ *                 type: string
+ *                 enum: [M, F]
+ *                 example: M
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: john@example.com
+ *               password:
+ *                 type: string
+ *                 minLength: 8
+ *                 example: password123
+ *               phone:
+ *                 type: string
+ *                 example: "+6281234567890"
+ *               address:
+ *                 type: string
+ *                 example: Jl. Merdeka No. 123, Jakarta
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *       400:
+ *         description: Validation failed
+ *       409:
+ *         description: Email already in use
+ *       500:
+ *         description: Server error
+ */
+
+
 export async function createNewUser(req: Request, res: Response): Promise<void> {
     // Mendefinisikan schema validasi untuk field-field wajib
     const validationSchema = z.object({
@@ -87,6 +146,34 @@ export async function createNewUser(req: Request, res: Response): Promise<void> 
     }
     return;
 }
+
+/**
+ * @swagger
+ * /users/{user_id}/deactivate:
+ *   patch:
+ *     summary: Deactivate a user account
+ *     tags:
+ *       - Users
+ *     parameters:
+ *       - in: path
+ *         name: user_id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID of the user to deactivate
+ *     responses:
+ *       200:
+ *         description: User deactivated successfully
+ *       400:
+ *         description: Validation failed
+ *       403:
+ *         description: Unauthorized action
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
+
 
 export async function deactivateUser(req: Request, res: Response): Promise<void> {
 
