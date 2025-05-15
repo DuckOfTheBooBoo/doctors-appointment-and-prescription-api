@@ -148,3 +148,29 @@ export async function createPrescriptionService(
         throw error;
     }
 }
+
+export async function getConsultationsForDoctor(
+	doctorId: number,
+	filter?: string
+): Promise<{ id: number, userId: number, scheduleId: number, bookedAt: Date, note: string | null, done: boolean }[]> {
+	try {
+		let query = consultationQueries.getByDoctorAll;
+		if (filter === "done") {
+			query = consultationQueries.getByDoctorDone;
+		} else if (filter === "pending") {
+			query = consultationQueries.getByDoctorPending;
+		}
+		const rows = await db.query(query, [doctorId]);
+		// Map each row to an object with a "done" flag based on prescriptionId presence.
+		return rows.map(row => ({
+			id: row.id,
+			userId: row.user_id,
+			scheduleId: row.schedule_id,
+			bookedAt: row.booked_at,
+			note: row.note,
+			done: row.prescriptionId ? true : false
+		}));
+	} catch (error) {
+		throw error;
+	}
+}
