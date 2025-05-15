@@ -3,7 +3,7 @@ import { db } from "@/db";
 // Mengimpor query yang digunakan untuk operasi user dari "@/db/queries/user.queries"
 import { userQueries } from "@/db/queries/user.queries";
 // Mengimpor error khusus DuplicateError dari module "@/errors"
-import { DuplicateError } from "@/errors";
+import { DuplicateError, NotFoundError } from "@/errors";
 // Mengimpor model User dari "@/models/user.model"
 import { User } from "@/models/user.model";
 // Mengimpor tipe MySQLError dan UserInput dari "@/types/common"
@@ -51,6 +51,24 @@ export async function createUserService(body: UserInput): Promise<User> {
         }
         // Mencetak error dan melempar ulang error tersebut
         console.error("Error while creating user:", error);
+        throw error;
+    }
+}
+
+// Membuat fungsi service untuk menonaktifkan user
+export async function deactivateUserService(userId: number): Promise<void> {
+    try {
+        // Mengecek apakah userId valid
+        const rows = await db.query(userQueries.getById, [userId]);
+        if (rows.length === 0) {
+            throw new NotFoundError(`User with ID ${userId} does not exist.`);
+        }
+
+        // Mengeksekusi query untuk mengubah is_active menjadi 0 berdasarkan userId
+        await db.execute(userQueries.deactivate, [userId]);
+    } catch (error) {
+        // Mencetak error dan melempar ulang error tersebut
+        console.error("Error while deactivating user:", error);
         throw error;
     }
 }

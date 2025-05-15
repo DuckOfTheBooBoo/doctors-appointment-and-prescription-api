@@ -1,9 +1,9 @@
 // Mengimpor error DuplicateError dari "@/errors"
-import { DuplicateError } from '@/errors';
+import { DuplicateError, NotFoundError } from '@/errors';
 // Mengimpor model User dari "@/models/user.model"
 import { User } from '@/models/user.model';
 // Mengimpor fungsi service untuk membuat user baru
-import { createUserService } from '@/services/user.service';
+import { createUserService, deactivateUserService } from '@/services/user.service';
 // Mengimpor tipe Request dan Response dari express
 import type { Request, Response } from 'express';
 // Mengimpor modul zod untuk validasi
@@ -86,4 +86,55 @@ export async function createNewUser(req: Request, res: Response): Promise<void> 
         return;
     }
     return;
+}
+
+export async function deactivateUser(req: Request, res: Response): Promise<void> {
+
+    const validationSchema = z.object({
+        user_id: z.preprocess((val) => typeof val === "string" ? parseInt(val, 10) : val, z.number().int())
+    })
+
+    const valResult = validationSchema.safeParse(req.params);
+
+    if (!valResult.success) {
+        const errors = valResult.error.errors.map(err => ({
+            field: err.path[0],
+            error: err.message
+        }));
+        res.status(400).json({
+            message: "Validation failed",
+            errors
+        });
+        return;
+    }
+
+    if (valResult.data.user_id !== req.decodedToken.userId) {
+        res.status(403).json({
+            message: "You are not authorized to perform this action."
+        });
+        return;
+    }
+
+    try {
+        await deactivateUserService(valResult.data.user_id);
+
+        res.status(200).json({
+            message: "User deactivated successfully.",
+        });
+        return;
+    } catch (error) {
+
+        if (error instanceof NotFoundError) {
+            res.status(404).json({
+                message: error.message
+            });
+            return;
+        }
+
+        console.error(error);
+        res.status(500).json({
+            message: "Something went wrong."
+        });
+        return;
+    }
 }
