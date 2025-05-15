@@ -13,10 +13,10 @@ import { License } from "@/models/license.model";
 import { MedicalProfessional } from "@/models/medicalProfessional.model";
 import { Schedule } from "@/models/schedule.model";
 // Mengimpor tipe input DoctorInput dari "@/types/common"
-import { DoctorInput } from "@/types/common";
+import { DoctorInput, MySQLError } from "@/types/common";
 // Mengimpor tipe ResultSetHeader dan PoolConnection
 import { type ResultSetHeader, type PoolConnection, RowDataPacket } from "mysql2/promise";
-import { NotFoundError } from "@/errors";
+import { DuplicateError, NotFoundError } from "@/errors";
 
 // Fungsi untuk membuat doctor baru
 export async function createDoctorService(body: DoctorInput): Promise<MedicalProfessional> {
@@ -126,6 +126,12 @@ export async function addDoctorScheduleService(doctorId: number, body: { date: s
 
         return new Schedule(scheduleId, doctorId, new Date(date), start_hour, end_hour);
     } catch (error) {
+        const err = error as MySQLError;
+        if (err.errno && err.errno === 1062) {
+            throw new DuplicateError("Schedule already exists for this date and time");
+        }
+
+        console.error("Error while creating schedule:", error);
         throw error;
     }
 }
@@ -172,6 +178,8 @@ export async function getDoctorDetailsService(doctorId: number, startDate?: stri
     const start = startDate || defaultDate;
     const end = endDate || defaultDate;
 
+    console.log(start, end);
+
     // Use the query from medicalProfessionalsQueries
     const doctorRows = await db.query<DoctorInfoRow[]>(medicalProfessionalsQueries.getDoctorDetails, [doctorId]);
     if (doctorRows.length === 0) {
@@ -180,7 +188,6 @@ export async function getDoctorDetailsService(doctorId: number, startDate?: stri
 
     const doctor = doctorRows[0];
     const fullName = `${doctor.prefix ? doctor.prefix + " " : ""}${doctor.first_name}${doctor.last_name ? " " + doctor.last_name : ""}${doctor.suffix ? " " + doctor.suffix : ""}`.trim();
-
     const scheduleRows = await db.query<ScheduleRow[]>(scheduleQueries.getByDateRange, [doctorId, start, end]);
 
     return {
@@ -195,8 +202,15 @@ export async function getDoctorDetailsService(doctorId: number, startDate?: stri
 export async function deactivateMedicalProfessionalService(medProfId: number): Promise<void> {
     try {
         await db.transaction(async (connection: PoolConnection) => {
-            await connection.execute(medicalProfessionalsQueries.deactivate, [medProfId]);
-            await connection.execute(userQueries.deactivate, [medProfId]);
+            const [mpRows] = await connection.execute<ResultSetHeader>(medicalProfessionalsQueries.deactivate, [medProfId]);
+            if (mpRows.affectedRows === 0) {
+                throw new NotFoundError("Medical professional not found");
+            }
+            
+            const [userRows] = await connection.execute<ResultSetHeader>(userQueries.deactivate, [medProfId]);
+            if (userRows.affectedRows === 0) {
+                throw new NotFoundError("Medical professional not found");
+            }
         });
     } catch (error) {
         throw error;

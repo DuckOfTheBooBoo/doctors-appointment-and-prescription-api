@@ -1,5 +1,5 @@
 // Mengimpor fungsi service untuk membuat doctor
-import { NotFoundError } from "@/errors";
+import { DuplicateError, NotFoundError } from "@/errors";
 import { addDoctorScheduleService, createDoctorService, deactivateMedicalProfessionalService, getDoctorDetailsService, getDoctorsService, updateDoctorScheduleService } from "@/services/doctor.service";
 // Mengimpor tipe DoctorInput
 import { DoctorInput } from "@/types/common";
@@ -106,37 +106,10 @@ export async function getDoctors(req: Request, res: Response) {
 }
 
 export async function addSchedule(req: Request, res: Response): Promise<void> {
-    // Mengambil doctor_id dari route parameter
-    const { doctor_id } = req.params;
 
-    // Mendeifinisikan schema zod untuk validasi doctor_id
-    const paramsSchema = z.object({
-        doctor_id: z.preprocess((val) => {
-            if (typeof val === "string") {
-                return parseInt(val, 10);
-            }
-            return val;
-        }, z.number().int())
-    });
-    
-    const paramsResult = paramsSchema.safeParse(req.params);
-    if (!paramsResult.success) {
-        const errors = paramsResult.error.errors.map(error => ({
-            field: error.path[0],
-            error: error.message
-        }));
-
-        res.status(400).json({
-            message: "Validation",
-            errors
-        });
-        return;
-    }
-
-    // Cek apakah id yang berada di dalam token sama dengan parameter doctor_id
-    if (paramsResult.data.doctor_id !== req.decodedToken.userId) {
+    if (req.decodedToken.role !== "doctor") {
         res.status(403).json({
-            message: "You're not authorized to make this request"
+            message: "You're not authorized to add schedule"
         });
         return;
     }
@@ -180,12 +153,20 @@ export async function addSchedule(req: Request, res: Response): Promise<void> {
 
     try {
         // Call service to add the schedule
-        const schedule = await addDoctorScheduleService(Number(doctor_id), req.body);
+        const schedule = await addDoctorScheduleService(req.decodedToken.userId, req.body);
         res.status(201).json({
             message: "Schedule added successfully",
             data: schedule
         });
     } catch (error) {
+
+        if (error instanceof DuplicateError) {
+            res.status(409).json({
+                message: error.message
+            });
+            return;
+        }
+
         console.error(error);
         res.status(500).json({
             message: "Something went wrong."
@@ -196,7 +177,6 @@ export async function addSchedule(req: Request, res: Response): Promise<void> {
 export async function updateSchedule(req: Request, res: Response): Promise<void> {
     // Validate route parameters: doctor_id and schedule_id
     const paramsSchema = z.object({
-        doctor_id: z.preprocess((val) => typeof val === "string" ? parseInt(val, 10) : val, z.number().int()),
         schedule_id: z.preprocess((val) => typeof val === "string" ? parseInt(val, 10) : val, z.number().int())
     });
     const paramsResult = paramsSchema.safeParse(req.params);
@@ -208,11 +188,13 @@ export async function updateSchedule(req: Request, res: Response): Promise<void>
         res.status(400).json({ message: "Validation failed", errors });
         return;
     }
-    const { doctor_id, schedule_id } = paramsResult.data;
+    const { schedule_id } = paramsResult.data;
     
     // Ensure the doctor updating the schedule matches the logged in user
-    if (doctor_id !== req.decodedToken.userId) {
-        res.status(403).json({ message: "You're not authorized to update this schedule" });
+    if (req.decodedToken.role !== "doctor") {
+        res.status(403).json({
+            message: "You're not authorized to update schedule"
+        });
         return;
     }
     
@@ -247,7 +229,7 @@ export async function updateSchedule(req: Request, res: Response): Promise<void>
     }
     
     try {
-        const updatedSchedule = await updateDoctorScheduleService(doctor_id, schedule_id, req.body);
+        const updatedSchedule = await updateDoctorScheduleService(req.decodedToken.userId, schedule_id, req.body);
         res.status(200).json({
             message: "Schedule updated successfully",
             data: updatedSchedule
