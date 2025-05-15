@@ -1,8 +1,39 @@
-import { Request, Response } from "express";
+import { Request , Response } from "express";
 import { z } from "zod";
-import { createConsultationService, getConsultation, getConsultationsForDoctor } from "@/services/consultation.service";
+import { createConsultationService, getConsultation } from "@/services/consultation.service";
 import { createPrescriptionService } from "@/services/consultation.service";
 import { DuplicateError, InsufficientAuthorizationError, InsufficientStockError, NotFoundError } from "@/errors";
+
+/**
+ * @swagger
+ * /consultations:
+ *   post:
+ *     summary: Create a new consultation
+ *     tags: [Consultation]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               schedule_id:
+ *                 type: integer
+ *                 example: 1
+ *     responses:
+ *       201:
+ *         description: Consultation created successfully
+ *       400:
+ *         description: Validation failed
+ *       403:
+ *         description: Unauthorized (not a patient)
+ *       409:
+ *         description: Duplicate consultation
+ *       500:
+ *         description: Server error
+ */
 
 export async function createConsultation(req: Request, res: Response) {
     if (!['patient'].includes(req.decodedToken.role)) {
@@ -51,7 +82,33 @@ export async function createConsultation(req: Request, res: Response) {
     }
 }
 
-
+/**
+ * @swagger
+ * /consultations/{consultation_id}/summary:
+ *   get:
+ *     summary: Get consultation summary
+ *     tags: [Consultation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: consultation_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Summary retrieved successfully
+ *       400:
+ *         description: Validation failed
+ *       403:
+ *         description: Unauthorized
+ *       404:
+ *         description: Consultation not found
+ *       500:
+ *         description: Server error
+ */
 
 export async function getConsultationSummary(req: Request, res: Response) {
 
@@ -109,6 +166,68 @@ export async function getConsultationSummary(req: Request, res: Response) {
 
 
 }
+
+
+
+/**
+ * @swagger
+ * /consultations/{consultation_id}/prescription:
+ *   post:
+ *     summary: Create prescription for consultation
+ *     tags: [Consultation]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: consultation_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         example: 1
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               note:
+ *                 type: string
+ *                 example: Patient needs rest and hydration
+ *               medicines:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                       example: 101
+ *                     dosage:
+ *                       type: string
+ *                       example: 500mg
+ *                     frequency:
+ *                       type: string
+ *                       example: 3x a day
+ *                     duration:
+ *                       type: string
+ *                       example: 5 days
+ *                     note:
+ *                       type: string
+ *                       example: After meals
+ *     responses:
+ *       200:
+ *         description: Prescription created successfully
+ *       400:
+ *         description: Validation failed
+ *       403:
+ *         description: Unauthorized
+ *       404:
+ *         description: Consultation not found
+ *       409:
+ *         description: Insufficient stock
+ *       500:
+ *         description: Server error
+ */
 
 export async function createPrescription(req: Request, res: Response): Promise<void> {
     // Validate consultation_id param
@@ -180,27 +299,4 @@ export async function createPrescription(req: Request, res: Response): Promise<v
         console.error(error);
         res.status(500).json({ message: "Something went wrong." });
     }
-}
-
-export async function getDoctorConsultations(req: Request, res: Response) {
-	// Only doctors can request this
-	if (req.decodedToken.role !== "doctor") {
-		res.status(403).json({
-			message: "You're not authorized to make this request"
-		});
-		return;
-	}
-	
-	// Optional filter: "done" or "pending"
-	const filter = req.query.filter as string | undefined;
-	try {
-		const consultations = await getConsultationsForDoctor(req.decodedToken.userId, filter);
-		res.status(200).json({
-			message: "Consultations retrieved successfully",
-			data: consultations
-		});
-	} catch (error) {
-		console.error(error);
-		res.status(500).json({ message: "Something went wrong." });
-	}
-}
+};
