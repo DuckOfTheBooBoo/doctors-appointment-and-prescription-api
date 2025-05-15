@@ -1,5 +1,5 @@
-import { NotFoundError } from "@/errors";
-import { addMedicineService, updateMedicineStockService } from "@/services/medicine.service";
+import { InsufficientAuthorizationError, NotFoundError } from "@/errors";
+import { addMedicineService, deleteMedicineService, updateMedicineStockService } from "@/services/medicine.service";
 import { Request, Response } from "express";
 import { z } from "zod";
 
@@ -54,7 +54,7 @@ export async function updateMedicineStock(req: Request, res: Response) {
     });
     // Validate the id from URL
     const schemaParams = z.object({
-        id: z.string().regex(/^\d+$/, "Invalid medicine id")
+        medicine_id: z.string().regex(/^\d+$/, "Invalid medicine id")
     });
 
     const parseBody = schemaBody.safeParse(req.body);
@@ -72,7 +72,7 @@ export async function updateMedicineStock(req: Request, res: Response) {
         return;
     }
 
-    const medicineId = parseInt(parseParams.data.id);
+    const medicineId = parseInt(parseParams.data.medicine_id);
     const { stock } = parseBody.data;
 
     try {
@@ -92,5 +92,45 @@ export async function updateMedicineStock(req: Request, res: Response) {
 
         console.error(error);
         res.status(500).json({ message: "Something went wrong." });
+    }
+}
+
+export async function deleteMedicine(req: Request, res: Response) {
+    const paramsSchema = z.object({
+        medicine_id: z.preprocess((val) => typeof val === "string" ? parseInt(val, 10) : val, z.number().int())
+    });
+
+    console.log(req.params);
+
+    const validationResult = paramsSchema.safeParse(req.params);
+
+    if (!validationResult.success) {
+        const errors = validationResult.error.errors.map(err => ({
+            field: err.path[0],
+            error: err.message
+        }));
+        res.status(400).json({ message: "Validation failed", errors });
+        return;
+    }
+
+    try {
+        await deleteMedicineService(validationResult.data.medicine_id);
+        res.status(200).json({
+            message: "Medicine deleted successfully"
+        });
+        return;
+    } catch (error) {
+
+        if (error instanceof InsufficientAuthorizationError) {
+            res.status(403).json({
+                message: error.message
+            });
+            return;
+        }
+
+        res.status(500).json({
+            message: "Something went wrong"
+        });
+        return;
     }
 }

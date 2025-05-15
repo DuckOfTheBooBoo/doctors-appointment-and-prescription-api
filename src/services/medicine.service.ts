@@ -1,7 +1,8 @@
 import { db } from "@/db";
 import { medicineQueries } from "@/db/queries/medicine.queries";
-import { NotFoundError } from "@/errors";
+import { InsufficientAuthorizationError, NotFoundError } from "@/errors";
 import { Medicine } from "@/models/medicine.model";
+import { MySQLError } from "@/types/common";
 import { RowDataPacket, type ResultSetHeader } from "mysql2/promise";
 
 export async function addMedicineService(input: { name: string; stock: number }): Promise<Medicine> {
@@ -33,4 +34,21 @@ export async function updateMedicineStockService(id: number, newStock: number): 
 	} catch (error) {
 		throw error;
 	}
+}
+
+export async function deleteMedicineService(id: number): Promise<void> {
+    try {
+        await db.execute(medicineQueries.delete, [id]);
+        return;
+    } catch (error) {
+
+        const err = error as MySQLError;
+        // Jika error merupakan ER_ROW_IS_REFERENCED_2 (errno 1451), lempar InsufficientAuthorizationError
+        if (err.errno && err.errno === 1451) {
+            throw new InsufficientAuthorizationError("Failed to delete medicine. Medicine is referenced in a prescription.");
+        }
+
+        console.error(error);
+        throw error;
+    }
 }
