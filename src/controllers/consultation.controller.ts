@@ -11,7 +11,7 @@ import { DuplicateError, InsufficientAuthorizationError, InsufficientStockError,
  *     summary: Create a new consultation.
  *     tags: [Consultation]
  *     security:
- *       - bearerAuth: []
+ *       - JWTAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -45,13 +45,13 @@ import { DuplicateError, InsufficientAuthorizationError, InsufficientStockError,
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/InternalErrorResponse"
+ *               $ref: "#/components/schemas/UnauthorizedResponse"
  *       409:
  *         description: Duplicate consultation.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/InternalErrorResponse"
+ *               $ref: "#/components/schemas/ConflictResponse"
  *       500:
  *         description: Internal server error.
  *         content:
@@ -114,7 +114,7 @@ export async function createConsultation(req: Request, res: Response) {
  *     summary: Get consultation summary.
  *     tags: [Consultation]
  *     security:
- *       - bearerAuth: []
+ *       - JWTAuth: []
  *     parameters:
  *       - name: consultation_id
  *         in: path
@@ -145,13 +145,7 @@ export async function createConsultation(req: Request, res: Response) {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/InternalErrorResponse"
- *       404:
- *         description: Consultation not found.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: "#/components/schemas/NotFoundResponse"
+ *               $ref: "#/components/schemas/UnauthorizedResponse"
  *       500:
  *         description: Internal server error.
  *         content:
@@ -221,12 +215,12 @@ export async function getConsultationSummary(req: Request, res: Response) {
 
 /**
  * @swagger
- * /consultations/{consultation_id}/prescription:
+ * /consultations/{consultation_id}:
  *   post:
  *     summary: Create prescription for consultation.
  *     tags: [Consultation]
  *     security:
- *       - bearerAuth: []
+ *       - JWTAuth: []
  *     parameters:
  *       - name: consultation_id
  *         in: path
@@ -290,9 +284,9 @@ export async function getConsultationSummary(req: Request, res: Response) {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/InternalErrorResponse"
+ *               $ref: "#/components/schemas/UnauthorizedResponse"
  *       404:
- *         description: Consultation not found.
+ *         description: Consultation or medicine not found.
  *         content:
  *           application/json:
  *             schema:
@@ -302,7 +296,11 @@ export async function getConsultationSummary(req: Request, res: Response) {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/InternalErrorResponse"
+ *               type: object
+ *               properties:
+ *                  message:
+ *                    type: string
+ *                    example: "Failed to decrease stock for medicine id"
  *       500:
  *         description: Server error.
  *         content:
@@ -388,9 +386,15 @@ export async function createPrescription(req: Request, res: Response): Promise<v
  * /consultations/doctor:
  *   get:
  *     summary: Retrieve consultations for a doctor.
- *     tags: [Consultation]
  *     security:
- *       - bearerAuth: []
+ *       - JWTAuth: []
+ *     tags: [Consultation]
+ *     parameters:
+ *       - in: query
+ *         name: filter
+ *         schema:
+ *           type: string
+ *         required: false
  *     responses:
  *       200:
  *         description: Consultations retrieved successfully.
@@ -410,7 +414,7 @@ export async function createPrescription(req: Request, res: Response): Promise<v
  *         content:
  *           application/json:
  *             schema:
- *               $ref: "#/components/schemas/InternalErrorResponse"
+ *               $ref: "#/components/schemas/UnauthorizedResponse"
  *       500:
  *         description: Internal server error.
  *         content:

@@ -10,6 +10,8 @@ import { z } from "zod";
  * /admin/pending-registrations:
  *   get:
  *     summary: Get all pending user registrations
+ *     security:
+ *         - AdminAuth: []
  *     tags: [Admin]
  *     responses:
  *       200:
@@ -25,10 +27,13 @@ import { z } from "zod";
  *                 data:
  *                   type: array
  *                   items:
- *                     type: object
- *                     description: User registration data
+ *                     $ref: "#/components/schemas/UserWithLicense"
  *       500:
  *         description: Server error while retrieving pending registrations
+ *         content:
+ *          application/json:
+ *           schema:
+ *             $ref: "#/components/schemas/InternalErrorResponse"
  */
 
 // Fungsi untuk mengambil semua pending registrations
@@ -58,6 +63,8 @@ export async function pendingRegistrations(_: Request, res: Response) {
  * /admin/approve-registration:
  *   post:
  *     summary: Approve a user registration
+ *     security:
+ *         - AdminAuth: []
  *     tags: [Admin]
  *     requestBody:
  *       required: true
@@ -77,15 +84,15 @@ export async function pendingRegistrations(_: Request, res: Response) {
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 data:
- *                   type: object
- *                   description: Approval result
+ *                $ref: "#/components/schemas/UserInvitation"
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
+ *       401:
+ *         description: Invalid credentials.
  *         content:
  *           application/json:
  *             schema:
@@ -93,16 +100,20 @@ export async function pendingRegistrations(_: Request, res: Response) {
  *               properties:
  *                 message:
  *                   type: string
- *                 errors:
- *                   type: array
- *                   items:
- *                     type: object
+ *                   example: "Please provide admin key"
  *       404:
- *         description: User not found
+ *         description: Not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/NotFoundResponse"
  *       500:
- *         description: Server error during approval
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
-
 export async function approveRegistration(req: Request, res: Response) {
     try {
 

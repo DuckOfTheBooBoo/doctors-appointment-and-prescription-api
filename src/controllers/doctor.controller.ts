@@ -19,16 +19,33 @@ import { z } from "zod";
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/DoctorInput'
+ *             $ref: "#/components/schemas/UserWithLicense"
  *     responses:
  *       201:
- *         description: Doctor created successfully
+ *         description: Account creation successful. Wait for admin approval.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/SuccessResponse"
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
+ *       409:
+ *          description:  Duplicate record, could be because of email or phone.
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: "#/components/schemas/ConflictResponse"
  *       500:
- *         description: Internal server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
-
 export async function createDoctor(req: Request, res: Response) {
     // Mendefinisikan schema validasi untuk data license doctor
     const licenseSchema = z.object({
@@ -118,33 +135,49 @@ export async function createDoctor(req: Request, res: Response) {
     }
     return;
 }
+
 /**
  * @swagger
  * /doctors:
  *   get:
  *     summary: Get list of doctors
  *     tags: [Doctors]
+ *     security:
+ *          - JWTAuth: []
  *     parameters:
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
  *         required: false
+ *         example: 1
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
  *         required: false
+ *         example: 10
  *       - in: query
  *         name: specialization
  *         schema:
  *           type: string
  *         required: false
+ *         example: "cardiology"
  *     responses:
  *       200:
- *         description: List of doctors retrieved successfully
+ *         description: List of doctors retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: "#/components/schemas/UserWithLicense"
  *       500:
- *         description: Internal server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
 export async function getDoctors(req: Request, res: Response) {
     const { page = 1, limit = 10, specialization } = req.query;
@@ -159,12 +192,15 @@ export async function getDoctors(req: Request, res: Response) {
         });
     }
 }
+
 /**
  * @swagger
  * /doctors/schedules:
  *   post:
  *     summary: Add a schedule for the logged-in doctor
  *     tags: [Doctors]
+ *     security:
+ *       - JWTAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -174,19 +210,54 @@ export async function getDoctors(req: Request, res: Response) {
  *             properties:
  *               date:
  *                 type: string
+ *                 example: "2023-08-30"
  *               start_hour:
  *                 type: integer
+ *                 example: 9
  *               end_hour:
  *                 type: integer
+ *                 example: 17
  *     responses:
  *       201:
- *         description: Schedule added successfully
+ *         description: Schedule added successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                      type: string
+ *                      example: "Schedule added successfully"
+ *                  data:
+ *                      $ref: "#/components/schemas/Schedule"
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
  *       403:
- *         description: Unauthorized
+ *         description: Unauthorized.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/UnauthorizedResponse"
+ *       409:
+ *         description: Conflict error – duplicate schedule.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Schedule already exists for this date and time"
  *       500:
- *         description: Internal server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
 export async function addSchedule(req: Request, res: Response): Promise<void> {
 
@@ -256,18 +327,22 @@ export async function addSchedule(req: Request, res: Response): Promise<void> {
         });
     }
 }
+
 /**
  * @swagger
  * /doctors/schedules/{schedule_id}:
  *   put:
  *     summary: Update a schedule for the logged-in doctor
  *     tags: [Doctors]
+ *     security:
+ *       - JWTAuth: []
  *     parameters:
  *       - in: path
  *         name: schedule_id
  *         required: true
  *         schema:
  *           type: integer
+ *         example: 5
  *     requestBody:
  *       required: true
  *       content:
@@ -277,21 +352,54 @@ export async function addSchedule(req: Request, res: Response): Promise<void> {
  *             properties:
  *               date:
  *                 type: string
+ *                 example: "2023-08-31"
  *               start_hour:
  *                 type: integer
+ *                 example: 10
  *               end_hour:
  *                 type: integer
+ *                 example: 18
  *     responses:
  *       200:
- *         description: Schedule updated successfully
+ *         description: Schedule updated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                      type: string
+ *                      exampe: "Schedule updated successfully"
+ *                  data:
+ *                      $ref: "#/components/schemas/Schedule"
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
  *       403:
- *         description: Unauthorized
+ *         description: Unauthorized.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/UnauthorizedResponse"
  *       404:
- *         description: Not found
+ *         description: Schedule not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                      type: string
+ *                      example: "Schedule not found"
  *       500:
- *         description: Internal server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
 export async function updateSchedule(req: Request, res: Response): Promise<void> {
     // Validate route parameters: doctor_id and schedule_id
@@ -362,11 +470,14 @@ export async function updateSchedule(req: Request, res: Response): Promise<void>
         res.status(500).json({ message: "Something went wrong." });
     }
 }
+
 /**
  * @swagger
  * /doctors/{doctor_id}:
  *   get:
  *     summary: Get details of a doctor by ID
+ *     security:
+ *       - JWTAuth: []
  *     tags: [Doctors]
  *     parameters:
  *       - in: path
@@ -374,25 +485,48 @@ export async function updateSchedule(req: Request, res: Response): Promise<void>
  *         required: true
  *         schema:
  *           type: integer
+ *         example: 12
  *       - in: query
  *         name: start_date
  *         schema:
  *           type: string
  *         required: false
+ *         example: "2023-01-01"
  *       - in: query
  *         name: end_date
  *         schema:
  *           type: string
  *         required: false
+ *         example: "2023-12-31"
  *     responses:
  *       200:
- *         description: Doctor details retrieved successfully
+ *         description: Doctor details retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/SimpleDoctor"
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
  *       404:
- *         description: Doctor not found
+ *         description: Doctor not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                      type: string
+ *                      example: "Doctor not found"
  *       500:
- *         description: Internal server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
 export async function getDoctorDetails(req: Request, res: Response) {
     const { doctor_id } = req.params;
@@ -436,23 +570,45 @@ export async function getDoctorDetails(req: Request, res: Response) {
  *   delete:
  *     summary: Deactivate a doctor by ID
  *     tags: [Doctors]
+ *     security:
+ *          - AdminAuth: []
  *     parameters:
  *       - in: path
  *         name: doctor_id
  *         required: true
  *         schema:
  *           type: integer
+ *         example: 12
  *     responses:
  *       200:
- *         description: Doctor deactivated successfully
+ *         description: Doctor deactivated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/SuccessResponse"
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
  *       404:
- *         description: Doctor not found
+ *         description: Doctor not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                      type: string
+ *                      example: "Medical Professional not found"
  *       500:
- *         description: Internal server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
-
 export async function deactivateDoctor(req: Request, res: Response) {
     const { doctor_id } = req.params;
     const doctorId = parseInt(doctor_id, 10);

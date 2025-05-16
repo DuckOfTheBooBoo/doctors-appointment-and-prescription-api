@@ -21,50 +21,38 @@ import { z } from 'zod';
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             required:
- *               - first_name
- *               - date_of_birth
- *               - gender
- *               - email
- *               - password
- *               - phone
- *               - address
- *             properties:
- *               first_name:
- *                 type: string
- *                 example: John
- *               date_of_birth:
- *                 type: string
- *                 format: date
- *                 example: 1990-01-01
- *               gender:
- *                 type: string
- *                 enum: [M, F]
- *                 example: M
- *               email:
- *                 type: string
- *                 format: email
- *                 example: john@example.com
- *               password:
- *                 type: string
- *                 minLength: 8
- *                 example: password123
- *               phone:
- *                 type: string
- *                 example: "+6281234567890"
- *               address:
- *                 type: string
- *                 example: Jl. Merdeka No. 123, Jakarta
+ *             $ref: "#/components/schemas/User"
  *     responses:
  *       201:
- *         description: User created successfully
+ *         description: Account creation successful. Wait for admin approval.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                      type: string
+ *                      example: "Account creation successful"
+ *                  data:
+ *                      $ref: "#/components/schemas/User"
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
  *       409:
- *         description: Email already in use
+ *          description:  Duplicate record, could be because of email or phone.
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: "#/components/schemas/ConflictResponse"
  *       500:
- *         description: Server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
 
 
@@ -152,26 +140,47 @@ export async function createNewUser(req: Request, res: Response): Promise<void> 
  * /users/{user_id}:
  *   delete:
  *     summary: Deactivate a user account
- *     tags:
- *       - Users
+ *     security:
+ *       - JWTAuth: []
+ *     tags: [Users]
  *     parameters:
  *       - in: path
  *         name: user_id
  *         required: true
  *         schema:
  *           type: integer
- *         description: ID of the user to deactivate
+ *         description: ID of the user to deactivate.
  *     responses:
  *       200:
- *         description: User deactivated successfully
+ *         description: User deactivated successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/SuccessResponse"
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
  *       403:
- *         description: Unauthorized action
+ *         description: Unauthorized action.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/UnauthorizedResponse"
  *       404:
- *         description: User not found
+ *         description: User not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/NotFoundResponse"
  *       500:
- *         description: Server error
+ *         description: Server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
 export async function deactivateUser(req: Request, res: Response): Promise<void> {
 

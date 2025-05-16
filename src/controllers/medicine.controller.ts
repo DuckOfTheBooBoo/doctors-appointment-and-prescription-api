@@ -10,7 +10,7 @@ import { z } from "zod";
  *     summary: Add a new medicine
  *     tags: [Medicine]
  *     security:
- *       - bearerAuth: []
+ *       - JWTAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -29,14 +29,35 @@ import { z } from "zod";
  *     responses:
  *       201:
  *         description: Medicine added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Medicine added successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/Medicine'
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
  *       403:
- *         description: Not authorized
+ *         description: Unauthorized.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/UnauthorizedResponse"
  *       500:
- *         description: Server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
-
 export async function addMedicine(req: Request, res: Response) {
 
     if (!['pharmacist'].includes(req.decodedToken.role)) {
@@ -80,7 +101,7 @@ export async function addMedicine(req: Request, res: Response) {
  *     summary: Update stock of a medicine
  *     tags: [Medicine]
  *     security:
- *       - bearerAuth: []
+ *       - JWTAuth: []
  *     parameters:
  *       - in: path
  *         name: medicine_id
@@ -102,15 +123,41 @@ export async function addMedicine(req: Request, res: Response) {
  *                 minimum: 0
  *     responses:
  *       200:
- *         description: Medicine stock updated successfully
+ *         description: Medicine updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Medicine stock updated successfully"
+ *                 data:
+ *                    $ref: "#/components/schemes/Medicine"
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
  *       403:
- *         description: Not authorized
+ *         description: Unauthorized.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/UnauthorizedResponse"
  *       404:
- *         description: Medicine not found
+ *         description: Medicine not found.
+ *         content:
+ *         application/json:
+ *              schema:
+ *                 $ref: "#/components/schemas/NotFoundResponse"
  *       500:
- *         description: Server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
 
 export async function updateMedicineStock(req: Request, res: Response) {
@@ -176,7 +223,7 @@ export async function updateMedicineStock(req: Request, res: Response) {
  *     summary: Delete a medicine
  *     tags: [Medicine]
  *     security:
- *       - bearerAuth: []
+ *       - JWTAuth: []
  *     parameters:
  *       - in: path
  *         name: medicine_id
@@ -187,20 +234,44 @@ export async function updateMedicineStock(req: Request, res: Response) {
  *     responses:
  *       200:
  *         description: Medicine deleted successfully
+ *         content:
+ *             application/json:
+ *              schema:
+ *                  $ref: "#/components/schemas/SuccessResponse"
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
  *       403:
- *         description: Not authorized
+ *         description: Unauthorized.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                  message:
+ *                      type: string
+ *                      example: "Failed to delete medicine. Medicine is referenced in a prescription."
+ *       404:
+ *         description: Medicine not found.
+ *         content:
+ *         application/json:
+ *              schema:
+ *                 $ref: "#/components/schemas/NotFoundResponse"
  *       500:
- *         description: Server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
 
 export async function deleteMedicine(req: Request, res: Response) {
     const paramsSchema = z.object({
         medicine_id: z.preprocess((val) => typeof val === "string" ? parseInt(val, 10) : val, z.number().int())
     });
-
-    console.log(req.params);
 
     const validationResult = paramsSchema.safeParse(req.params);
 
@@ -214,7 +285,13 @@ export async function deleteMedicine(req: Request, res: Response) {
     }
 
     try {
-        await deleteMedicineService(validationResult.data.medicine_id);
+        const rowAffected = await deleteMedicineService(validationResult.data.medicine_id);
+        if (rowAffected === 0) {
+            res.status(404).json({
+                message: "Medicine not found"
+            });
+            return;
+        }
         res.status(200).json({
             message: "Medicine deleted successfully"
         });
@@ -238,31 +315,31 @@ export async function deleteMedicine(req: Request, res: Response) {
 /**
  * @swagger
  * /medicines:
- *   get:
- *     summary: Get all medicines
- *     tags: [Medicine]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Medicines retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                 data:
- *                   type: array
- *                   items:
- *                     type: object
- *       403:
- *         description: Not authorized
- *       500:
- *         description: Server error
+ * get:
+ * summary: Get all medicines
+ * tags: [Medicine]
+ * security:
+ * - JWTAuth: [] # Assuming JWTAuth is defined in your securitySchemes
+ * responses:
+ * 200:
+ * description: Medicines retrieved successfully
+ * content:
+ * application/json:
+ * schema:
+ * $ref: '#/components/schemas/GetAllMedicinesResponse'
+ * 403:
+ * description: Not authorized
+ * content:
+ * application/json:
+ * schema:
+ * $ref: '#/components/schemas/UnauthorizedResponse' # Uses existing schema
+ * 500:
+ * description: Server error
+ * content:
+ * application/json:
+ * schema:
+ * $ref: '#/components/schemas/InternalErrorResponse' # Uses existing schema
  */
-
 export async function getAllMedicines(req: Request, res: Response) {
     if (!["pharmacist"].includes(req.decodedToken.role)) {
         res.status(403).json({
