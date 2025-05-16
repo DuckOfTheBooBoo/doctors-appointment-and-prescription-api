@@ -8,7 +8,7 @@ import { DuplicateError, InsufficientAuthorizationError, InsufficientStockError,
  * @swagger
  * /consultations:
  *   post:
- *     summary: Create a new consultation
+ *     summary: Create a new consultation.
  *     tags: [Consultation]
  *     security:
  *       - bearerAuth: []
@@ -24,15 +24,40 @@ import { DuplicateError, InsufficientAuthorizationError, InsufficientStockError,
  *                 example: 1
  *     responses:
  *       201:
- *         description: Consultation created successfully
+ *         description: Consultation created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: "#/components/schemas/Consultation"
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
  *       403:
- *         description: Unauthorized (not a patient)
+ *         description: Unauthorized.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  *       409:
- *         description: Duplicate consultation
+ *         description: Duplicate consultation.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  *       500:
- *         description: Server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
 
 export async function createConsultation(req: Request, res: Response) {
@@ -86,7 +111,7 @@ export async function createConsultation(req: Request, res: Response) {
  * @swagger
  * /consultations/{consultation_id}/summary:
  *   get:
- *     summary: Get consultation summary
+ *     summary: Get consultation summary.
  *     tags: [Consultation]
  *     security:
  *       - bearerAuth: []
@@ -99,15 +124,40 @@ export async function createConsultation(req: Request, res: Response) {
  *         example: 1
  *     responses:
  *       200:
- *         description: Summary retrieved successfully
+ *         description: Summary retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   $ref: "#/components/schemas/Consultation"
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
  *       403:
- *         description: Unauthorized
+ *         description: Unauthorized.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  *       404:
- *         description: Consultation not found
+ *         description: Consultation not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/NotFoundResponse"
  *       500:
- *         description: Server error
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
 
 export async function getConsultationSummary(req: Request, res: Response) {
@@ -173,7 +223,7 @@ export async function getConsultationSummary(req: Request, res: Response) {
  * @swagger
  * /consultations/{consultation_id}/prescription:
  *   post:
- *     summary: Create prescription for consultation
+ *     summary: Create prescription for consultation.
  *     tags: [Consultation]
  *     security:
  *       - bearerAuth: []
@@ -216,17 +266,49 @@ export async function getConsultationSummary(req: Request, res: Response) {
  *                       example: After meals
  *     responses:
  *       200:
- *         description: Prescription created successfully
+ *         description: Prescription created successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     prescriptionId:
+ *                       type: integer
  *       400:
- *         description: Validation failed
+ *         description: Validation failed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/BadResponse"
  *       403:
- *         description: Unauthorized
+ *         description: Unauthorized.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  *       404:
- *         description: Consultation not found
+ *         description: Consultation not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/NotFoundResponse"
  *       409:
- *         description: Insufficient stock
+ *         description: Insufficient stock.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  *       500:
- *         description: Server error
+ *         description: Server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
  */
 
 export async function createPrescription(req: Request, res: Response): Promise<void> {
@@ -300,6 +382,42 @@ export async function createPrescription(req: Request, res: Response): Promise<v
         res.status(500).json({ message: "Something went wrong." });
     }
 };
+
+/**
+ * @swagger
+ * /consultations/doctor:
+ *   get:
+ *     summary: Retrieve consultations for a doctor.
+ *     tags: [Consultation]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Consultations retrieved successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     $ref: "#/components/schemas/Consultation"
+ *       403:
+ *         description: Unauthorized.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
+ *       500:
+ *         description: Internal server error.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: "#/components/schemas/InternalErrorResponse"
+ */
 
 export async function getDoctorConsultations(req: Request, res: Response) {
 	// Only doctors can request this

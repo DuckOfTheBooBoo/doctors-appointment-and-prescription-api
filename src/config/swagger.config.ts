@@ -72,6 +72,17 @@ const swaggerConfig: SwaggerOptions = {
                     properties: {
                         message: { type: "string", example: "Something went wrong" }
                     }
+                },
+                Consultation: {
+                    type: "object",
+                    properties: {
+                        id: { type: "integer" },
+                        userId: { type: "integer" },
+                        scheduleId: { type: "integer" },
+                        bookedAt: { type: "string", format: "date-time" },
+                        note: { type: "string", nullable: true },
+                        done: { type: "boolean" }
+                    }
                 }
             },
             securitySchemes: {
