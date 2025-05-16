@@ -36,10 +36,10 @@ export async function updateMedicineStockService(id: number, newStock: number): 
 	}
 }
 
-export async function deleteMedicineService(id: number): Promise<void> {
+export async function deleteMedicineService(id: number): Promise<number> {
     try {
-        await db.execute(medicineQueries.delete, [id]);
-        return;
+        const result = await db.execute(medicineQueries.delete, [id]);
+        return result.affectedRows;
     } catch (error) {
 
         const err = error as MySQLError;
