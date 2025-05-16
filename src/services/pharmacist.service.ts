@@ -6,12 +6,13 @@ import { licenseQueries } from "@/db/queries/license.queries";
 import { medicalProfessionalsQueries } from "@/db/queries/medicalProfessionals.queries";
 // Mengimpor query user dari "@/db/queries/user.queries"
 import { userQueries } from "@/db/queries/user.queries";
+import { DuplicateError } from "@/errors";
 // Mengimpor model License dari "@/models/license.model"
 import { License } from "@/models/license.model";
 // Mengimpor model MedicalProfessional dari "@/models/medicalProfessional.model"
 import { MedicalProfessional } from "@/models/medicalProfessional.model";
 // Mengimpor tipe input untuk pharmacist dari "@/types/common"
-import { type PharmacistInput } from "@/types/common";
+import { MySQLError, type PharmacistInput } from "@/types/common";
 // Mengimpor tipe ResultSetHeader dan PoolConnection dari mysql2/promise
 import { type ResultSetHeader, type PoolConnection } from "mysql2/promise";
 
@@ -89,6 +90,13 @@ export async function createPharmacistService(body: PharmacistInput): Promise<Me
         return newPharmacist;
     } catch (error) {
         // Melempar ulang error jika terjadi kesalahan
+
+        const err = error as MySQLError;
+
+        // Jika error merupakan duplicate key error (errno 1062), lempar DuplicateError
+        if (err.errno && err.errno === 1062) {
+            throw new DuplicateError(err.sqlMessage);
+        }
         throw error;
     }
 }

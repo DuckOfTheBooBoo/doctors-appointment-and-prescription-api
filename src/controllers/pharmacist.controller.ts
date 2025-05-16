@@ -1,5 +1,5 @@
 // Mengimpor fungsi service untuk membuat pharmacist
-import { NotFoundError } from "@/errors";
+import { DuplicateError, NotFoundError } from "@/errors";
 import { deactivateMedicalProfessionalService } from "@/services/doctor.service";
 import { createPharmacistService } from "@/services/pharmacist.service";
 // Mengimpor tipe PharmacistInput
@@ -114,6 +114,12 @@ import { z } from "zod";
  *                       error:
  *                         type: string
  *                         example: Please provide first name.
+ *       409:
+ *          description:  Duplicate record, could be because of email or phone.
+ *          content:
+ *              application/json:
+ *                  schema:
+ *                      $ref: "#/components/schemas/ConflictResponse"
  *       500:
  *         description: Internal server error
  *         content:
@@ -187,6 +193,13 @@ export async function createPharmacist(req: Request, res: Response) {
 
     } catch (error) {
         // Mencetak error dan mengirim response 500 jika terjadi kesalahan
+        // Jika terjadi DuplicateError, kirim response 409
+        if (error instanceof DuplicateError) {
+            res.status(409).json({
+                message: error.message
+            });    
+            return;
+        }
         console.error(error)
         res.status(500).json({
             message: "Something went wrong."
@@ -198,8 +211,10 @@ export async function createPharmacist(req: Request, res: Response) {
 /**
  * @swagger
  * /pharmacists/{pharmacist_id}/deactivate:
- *   patch:
+ *   delete:
  *     summary: Deactivate a pharmacist account
+ *     security:
+ *         - AdminAuth: []
  *     tags:
  *       - Pharmacists
  *     parameters:

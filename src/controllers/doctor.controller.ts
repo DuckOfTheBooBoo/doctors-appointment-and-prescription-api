@@ -103,6 +103,13 @@ export async function createDoctor(req: Request, res: Response) {
 
     } catch (error) {
         // Mencetak error dan mengirim response 500 jika terjadi kesalahan
+        // Jika terjadi DuplicateError, kirim response 409
+        if (error instanceof DuplicateError) {
+            res.status(409).json({
+                message: error.message
+            });    
+            return;
+        }
         console.error(error)
         res.status(500).json({
             message: "Something went wrong."

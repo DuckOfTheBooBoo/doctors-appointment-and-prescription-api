@@ -92,6 +92,14 @@ export async function createDoctorService(body: DoctorInput): Promise<MedicalPro
         return newDoctor;
     } catch (error) {
         // Melempar ulang error jika terjadi kesalahan
+
+        const err = error as MySQLError;
+
+        // Jika error merupakan duplicate key error (errno 1062), lempar DuplicateError
+        if (err.errno && err.errno === 1062) {
+            throw new DuplicateError(err.sqlMessage);
+        }
+        
         throw error;
     }
 }
