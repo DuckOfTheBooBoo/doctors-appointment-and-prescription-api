@@ -7,7 +7,7 @@ import { z } from "zod";
 
 /**
  * @swagger
- * /pending-registrations:
+ * /admin/pending-registrations:
  *   get:
  *     summary: Get all pending user registrations
  *     tags: [Admin]
@@ -55,7 +55,7 @@ export async function pendingRegistrations(_: Request, res: Response) {
 
 /**
  * @swagger
- * /approve-registration:
+ * /admin/approve-registration:
  *   post:
  *     summary: Approve a user registration
  *     tags: [Admin]

@@ -418,7 +418,6 @@ export async function createPrescription(req: Request, res: Response): Promise<v
  *             schema:
  *               $ref: "#/components/schemas/InternalErrorResponse"
  */
-
 export async function getDoctorConsultations(req: Request, res: Response) {
 	// Only doctors can request this
 	if (req.decodedToken.role !== "doctor") {

@@ -9,7 +9,7 @@ import { z } from "zod";
 
 /**
  * @swagger
- * /login:
+ * /auth/login:
  *   post:
  *     summary: Authenticate user and return JWT token.
  *     tags:
@@ -113,7 +113,7 @@ export async function login(req: Request, res: Response) {
 
 /**
  * @swagger
- * /set-password:
+ * /auth/set-password:
  *   put:
  *     summary: Reset password using a token.
  *     tags:

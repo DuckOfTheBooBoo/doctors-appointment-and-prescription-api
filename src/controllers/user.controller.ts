@@ -149,8 +149,8 @@ export async function createNewUser(req: Request, res: Response): Promise<void> 
 
 /**
  * @swagger
- * /users/{user_id}/deactivate:
- *   patch:
+ * /users/{user_id}:
+ *   delete:
  *     summary: Deactivate a user account
  *     tags:
  *       - Users
@@ -173,8 +173,6 @@ export async function createNewUser(req: Request, res: Response): Promise<void> 
  *       500:
  *         description: Server error
  */
-
-
 export async function deactivateUser(req: Request, res: Response): Promise<void> {
 
     const validationSchema = z.object({
