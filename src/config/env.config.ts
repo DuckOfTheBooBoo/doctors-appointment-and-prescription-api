@@ -6,7 +6,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
 // Mendefinisikan interface Environment untuk tipe environment variables
 interface Environment {
-  PORT: number;
+  PORT: number | undefined;
+  DB_SOCKET_PATH: string | undefined;
   DB_HOST: string;
   DB_PORT: number;
   DB_USER: string;
@@ -20,7 +21,8 @@ interface Environment {
 
 // Membuat objek env dengan nilai default bila tidak didefinisikan
 export const env: Environment = {
-  PORT: Number(process.env.PORT) || 3000,
+  PORT: process.env.DB_SOCKET_PATH ? undefined : (Number(process.env.PORT) || 3000),
+  DB_SOCKET_PATH: process.env.DB_SOCKET_PATH,
   DB_HOST: process.env.DB_HOST || 'localhost',
   DB_PORT: Number(process.env.DB_PORT) || 3306,
   DB_USER: process.env.DB_USER || 'root',

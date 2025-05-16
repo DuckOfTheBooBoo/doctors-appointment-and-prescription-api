@@ -6,6 +6,8 @@ export default {
     host: env.DB_HOST,
     // Port database
     port: env.DB_PORT,
+    // Socket Path,
+    socketPath: env.DB_SOCKET_PATH,
     // User database
     user: env.DB_USER,
     // Password database
