@@ -341,7 +341,7 @@ export async function deleteMedicine(req: Request, res: Response) {
  * $ref: '#/components/schemas/InternalErrorResponse' # Uses existing schema
  */
 export async function getAllMedicines(req: Request, res: Response) {
-    if (!["pharmacist"].includes(req.decodedToken.role)) {
+    if (!["pharmacist", "doctor"].includes(req.decodedToken.role)) {
         res.status(403).json({
             message: "You're not authorized to make this request"
         });
