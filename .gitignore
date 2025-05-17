@@ -133,5 +133,7 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+app.yaml
+
 dummy_script
 .vscode
