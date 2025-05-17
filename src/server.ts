@@ -3,7 +3,7 @@ import express from "express";
 // Mengimpor router untuk menangani rute HTTP
 import router from "./routes";
 // Mengimpor fungsi validateEnv untuk validasi variabel lingkungan
-import { validateEnv } from "./config/env.config";
+import { env, validateEnv } from "./config/env.config";
 
 // Memvalidasi environment di awal aplikasi
 try {
@@ -28,7 +28,7 @@ app.use(express.json());
 app.use("/", router);
 
 // Menjalankan server di port 3000
-app.listen(3000, () => {
+app.listen(env.PORT, () => {
   // Mencetak pesan ke console ketika server berhasil dijalankan
-  console.log("Server is running on port 3000");
+  console.log(`Server is running on port ${env.PORT}`);
 });
