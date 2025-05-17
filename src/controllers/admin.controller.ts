@@ -28,6 +28,16 @@ import { z } from "zod";
  *                   type: array
  *                   items:
  *                     $ref: "#/components/schemas/UserWithLicense"
+ *       401:
+ *         description: Invalid credentials.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Please provide admin key"
  *       500:
  *         description: Server error while retrieving pending registrations
  *         content:
