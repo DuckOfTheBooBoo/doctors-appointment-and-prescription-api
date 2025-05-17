@@ -8,8 +8,8 @@ dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 interface Environment {
   PORT: number | undefined;
   DB_SOCKET_PATH: string | undefined;
-  DB_HOST: string;
-  DB_PORT: number;
+  DB_HOST: string | undefined;
+  DB_PORT: number | undefined;
   DB_USER: string;
   DB_PASSWORD: string;
   DB_NAME: string;
@@ -21,10 +21,10 @@ interface Environment {
 
 // Membuat objek env dengan nilai default bila tidak didefinisikan
 export const env: Environment = {
-  PORT: process.env.DB_SOCKET_PATH ? undefined : (Number(process.env.PORT) || 3000),
+  PORT: Number(process.env.PORT) || 3000,
   DB_SOCKET_PATH: process.env.DB_SOCKET_PATH,
-  DB_HOST: process.env.DB_HOST || 'localhost',
-  DB_PORT: Number(process.env.DB_PORT) || 3306,
+  DB_HOST: process.env.DB_SOCKET_PATH ? undefined : (process.env.DB_HOST || 'localhost'),
+  DB_PORT: process.env.DB_SOCKET_PATH ? undefined : (Number(process.env.DB_PORT) || 3306),
   DB_USER: process.env.DB_USER || 'root',
   DB_PASSWORD: process.env.DB_PASSWORD || 'password',
   DB_NAME: process.env.DB_NAME || 'my_database',
@@ -33,6 +33,8 @@ export const env: Environment = {
   ADMIN_KEY: process.env.ADMIN_KEY || 'admin_key',
   SALT_ROUNDS: process.env.SALT_ROUNDS ? parseInt(process.env.SALT_ROUNDS) : 10
 };
+
+console.log(env);
 
 // Fungsi untuk memvalidasi environment variables yang wajib ada
 export const validateEnv = (): void => {

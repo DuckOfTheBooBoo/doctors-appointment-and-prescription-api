@@ -10,6 +10,7 @@ class DatabaseConnection {
 
     constructor() {
         // Membuat pool koneksi menggunakan konfigurasi database
+        console.log(dbConfig);
         this.pool = mysql.createPool(dbConfig);
         // Menguji koneksi database
         this.testConnection();
