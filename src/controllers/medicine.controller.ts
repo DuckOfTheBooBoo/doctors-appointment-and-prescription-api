@@ -315,30 +315,30 @@ export async function deleteMedicine(req: Request, res: Response) {
 /**
  * @swagger
  * /medicines:
- * get:
- * summary: Get all medicines
- * tags: [Medicine]
- * security:
- * - JWTAuth: [] # Assuming JWTAuth is defined in your securitySchemes
- * responses:
- * 200:
- * description: Medicines retrieved successfully
- * content:
- * application/json:
- * schema:
- * $ref: '#/components/schemas/GetAllMedicinesResponse'
- * 403:
- * description: Not authorized
- * content:
- * application/json:
- * schema:
- * $ref: '#/components/schemas/UnauthorizedResponse' # Uses existing schema
- * 500:
- * description: Server error
- * content:
- * application/json:
- * schema:
- * $ref: '#/components/schemas/InternalErrorResponse' # Uses existing schema
+ *   get:
+ *     summary: Get all medicines
+ *     tags: [Medicine]
+ *     security:
+ *       - JWTAuth: [] # Assuming JWTAuth is defined in your securitySchemes
+ *     responses:
+ *       200:
+ *         description: Medicines retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/GetAllMedicinesResponse'
+ *       403:
+ *         description: Not authorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/UnauthorizedResponse' # Uses existing schema
+ *       500:
+ *         description: Server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/InternalErrorResponse' # Uses existing schema
  */
 export async function getAllMedicines(req: Request, res: Response) {
     if (!["pharmacist", "doctor"].includes(req.decodedToken.role)) {
