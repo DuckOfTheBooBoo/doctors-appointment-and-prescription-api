@@ -133,7 +133,7 @@ export async function addMedicine(req: Request, res: Response) {
  *                   type: string
  *                   example: "Medicine stock updated successfully"
  *                 data:
- *                    $ref: "#/components/schemes/Medicine"
+ *                    $ref: "#/components/schemas/Medicine"
  *       400:
  *         description: Validation failed.
  *         content:
