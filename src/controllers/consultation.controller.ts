@@ -8,7 +8,7 @@ import { DuplicateError, InsufficientAuthorizationError, InsufficientStockError,
  * @swagger
  * /consultations:
  *   post:
- *     summary: Create a new consultation.
+ *     summary: Create a new appointment (User)
  *     tags: [Consultation]
  *     security:
  *       - JWTAuth: []
@@ -146,6 +146,16 @@ export async function createConsultation(req: Request, res: Response) {
  *           application/json:
  *             schema:
  *               $ref: "#/components/schemas/UnauthorizedResponse"
+ *       404:
+ *         description: Consultation not found.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *                  properties:
+ *                      message:
+ *                          type: string
+ *                          example: "Consultation not found"
  *       500:
  *         description: Internal server error.
  *         content:
@@ -217,7 +227,7 @@ export async function getConsultationSummary(req: Request, res: Response) {
  * @swagger
  * /consultations/{consultation_id}:
  *   post:
- *     summary: Create prescription for consultation.
+ *     summary: Create prescription for consultation (for doctor).
  *     tags: [Consultation]
  *     security:
  *       - JWTAuth: []

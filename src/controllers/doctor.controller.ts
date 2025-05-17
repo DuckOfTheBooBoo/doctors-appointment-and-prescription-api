@@ -19,7 +19,7 @@ import { z } from "zod";
  *       content:
  *         application/json:
  *           schema:
- *             $ref: "#/components/schemas/UserWithLicense"
+ *             $ref: "#/components/schemas/MedicalProfessionalRequestBody"
  *     responses:
  *       201:
  *         description: Account creation successful. Wait for admin approval.

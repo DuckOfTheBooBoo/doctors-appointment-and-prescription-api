@@ -94,14 +94,48 @@ const swaggerConfig: SwaggerOptions = {
             done: { type: "boolean" },
           },
         },
-        MedicalProfessional: {
+        MedicalProfessionalRequestBody: {
           type: "object",
-          properties: {},
+          properties: {
+            prefix: { type: "string", nullable: true },
+            suffix: { type: "string", nullable: true },
+            first_name: { type: "string" },
+            last_name: { type: "string", nullable: true },
+            date_of_birth: { type: "string", format: "date" },
+            gender: { type: "string", enum: ["M", "F"] },
+            phone: { type: "string" },
+            email: { type: "string" },
+            address: { type: "string" },
+            license: { $ref: "#/components/schemas/License" },
+          },
+        },
+        UserRequestBoody: {
+            type: "object",
+            properties: {
+              prefix: { type: "string", nullable: true },
+              suffix: { type: "string", nullable: true },
+              first_name: { type: "string" },
+              last_name: { type: "string", nullable: true },
+              date_of_birth: { type: "string", format: "date", example: "YYYY-MM-DD" },
+              gender: { type: "string", enum: ["M", "F"] },
+              phone: { type: "string" },
+              email: { type: "string" },
+              password: { type: "string" },
+              address: { type: "string" },
+            },
+            required: [
+              "first_name",
+              "date_of_birth",
+              "gender",
+              "phone",
+              "email",
+              "password",
+              "address",
+            ],
         },
         User: {
           type: "object",
           properties: {
-            id: { type: "integer", nullable: true },
             prefix: { type: "string", nullable: true },
             suffix: { type: "string", nullable: true },
             first_name: { type: "string" },
@@ -112,7 +146,6 @@ const swaggerConfig: SwaggerOptions = {
             email: { type: "string", nullable: true },
             password: { type: "string", nullable: true },
             address: { type: "string" },
-            is_ative: { type: "integer" },
           },
           required: [
             "first_name",
@@ -166,17 +199,6 @@ const swaggerConfig: SwaggerOptions = {
             address: {
               type: "string",
               example: "Rangkapan Jaya Baru, Pancoran Mas, Depok",
-            },
-            is_active: { type: "integer", example: 0 },
-            created_at: {
-              type: "string",
-              format: "date-time",
-              example: "2025-05-15T02:15:24.000Z",
-            },
-            updated_at: {
-              type: "string",
-              format: "date-time",
-              example: "2025-05-15T02:15:24.000Z",
             },
             specialization: { type: "string", nullable: true, example: null },
             role: { type: "string", example: "pharmacist" },
