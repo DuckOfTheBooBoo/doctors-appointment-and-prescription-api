@@ -26,7 +26,7 @@ const swaggerConfig: SwaggerOptions = {
           },
         },
         // Define your schemas here
-        login_response: {
+        LoginResponse: {
           type: "object",
           properties: {
             message: { type: "string" },

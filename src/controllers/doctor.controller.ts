@@ -193,7 +193,7 @@ export async function getDoctors(req: Request, res: Response) {
 
 /**
  * @swagger
- * /doctors/schedules:
+ * /doctors/me/schedules:
  *   post:
  *     summary: Add a schedule for the logged-in doctor
  *     tags: [Doctors]
