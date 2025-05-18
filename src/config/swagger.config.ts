@@ -12,12 +12,8 @@ const swaggerConfig: SwaggerOptions = {
     },
     servers: [
       {
-        url: "http://localhost:3000", // URL of the server
-        description: "Development server", // Description of the server
-      },
-      {
         url: "https://project-3-sem-4.et.r.appspot.com/",
-        description: "Google App Engine deployed server"
+        description: "Google App Engine Server"
       }
     ],
     // paths: {}, // Paths will be populated dynamically
