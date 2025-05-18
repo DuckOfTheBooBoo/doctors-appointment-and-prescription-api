@@ -142,8 +142,6 @@ export async function createDoctor(req: Request, res: Response) {
  *   get:
  *     summary: Get list of doctors
  *     tags: [Doctors]
- *     security:
- *          - JWTAuth: []
  *     parameters:
  *       - in: query
  *         name: page
@@ -476,8 +474,6 @@ export async function updateSchedule(req: Request, res: Response): Promise<void>
  * /doctors/{doctor_id}:
  *   get:
  *     summary: Get details of a doctor by ID
- *     security:
- *       - JWTAuth: []
  *     tags: [Doctors]
  *     parameters:
  *       - in: path
