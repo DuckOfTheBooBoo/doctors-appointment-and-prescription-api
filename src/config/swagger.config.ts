@@ -106,6 +106,7 @@ const swaggerConfig: SwaggerOptions = {
             phone: { type: "string" },
             email: { type: "string" },
             address: { type: "string" },
+            specialization: { type: "string", example: "Obgyn"},
             license: { $ref: "#/components/schemas/License" },
           },
         },
@@ -169,12 +170,12 @@ const swaggerConfig: SwaggerOptions = {
             issue_date: {
               type: "string",
               format: "date-time",
-              example: "2020-09-08T17:00:00.000Z",
+              example: "2020-09-08",
             },
             expiry_date: {
               type: "string",
               format: "date-time",
-              example: "2027-09-08T17:00:00.000Z",
+              example: "2027-09-08",
             },
             specialty: { type: "string", nullable: true, example: null },
           },
@@ -192,7 +193,7 @@ const swaggerConfig: SwaggerOptions = {
             date_of_birth: {
               type: "string",
               format: "date-time",
-              example: "2005-12-08T17:00:00.000Z",
+              example: "2005-12-08",
             },
             gender: { type: "string", enum: ["M", "F"], example: "M" },
             phone: { type: "string", example: "6281211614212" },
@@ -281,7 +282,7 @@ const swaggerConfig: SwaggerOptions = {
                         type: "object",
                         properties: {
                             id: { type: "integer", example: 5 },
-                            date: { type: "string", format: "date-time", example: "2025-06-14T17:00:00.000Z" },
+                            date: { type: "string", format: "date-time", example: "2025-06-14" },
                             start_hour: { type: "integer", example: 11 },
                             end_hour: { type: "integer", example: 15 },
                         },
